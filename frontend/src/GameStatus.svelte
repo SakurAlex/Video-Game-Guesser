@@ -42,7 +42,6 @@
     width: 125px;
     height: 36px;
     cursor: pointer;
-    transition: opacity 0.2s ease;
   }
 
   .give-up-button:hover {

@@ -1,7 +1,11 @@
 <script lang="ts">
   export let remainingAttempts = 10;
   import giveUpIcon from './assets/change.svg';
-  function handleGiveUp() {}
+  
+  function handleGiveUp() {
+    alert("You gave up! Let's check the answer!");
+    remainingAttempts = 10;
+  }
 </script>
 
 <div class="status-container">
@@ -32,10 +36,16 @@
     gap: 0.25rem;
     align-items: center;
     background-color: #E9776E;
+    box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
     border-radius: 20px;
     border: none;
-    width: 120px;
+    width: 125px;
     height: 36px;
+    cursor: pointer;
+  }
+
+  .give-up-button:hover {
+    opacity: 0.9;
   }
 
   .give-up-text {

@@ -199,8 +199,7 @@
 
   .search-input:focus {
     box-shadow:
-      -4px 4px 4px 0px rgba(0, 0, 0, 0.15),
-      0 0 0 2px rgba(185, 219, 243, 0.5);
+      -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
   }
 
   .search-button {

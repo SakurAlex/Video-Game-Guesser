@@ -1,4 +1,4 @@
-# GameGuess
+# GameGuesser
 
 A game guessing application built with Svelte frontend and Flask backend.
 

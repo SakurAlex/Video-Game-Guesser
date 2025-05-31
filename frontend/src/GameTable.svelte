@@ -53,11 +53,12 @@
     text-align: left;
     font-size: 22px;
     font-weight: bold;
+    color: #2C3E50;
   }
 
   td {
     padding: 16px;
-    color: #777;
+    color: #2C3E50;
     text-align: left;
   }
 

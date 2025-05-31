@@ -19,7 +19,6 @@ body {
 body > *{
   margin: 2px auto;
   justify-content: center;
-  display: flex;
 }
 
 /* Tablet breakpoint: hide sidebar and right divider, adjust logo and line colors */

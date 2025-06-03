@@ -16,7 +16,6 @@
   // Reactive statement to check if input has content
   $: hasContent = searchQuery.trim().length > 0;
 
-  // Debounced search function
   function handleSearch(query: string) {
     if (searchTimeout) {
       clearTimeout(searchTimeout);
@@ -60,12 +59,28 @@
     }
   }
 
-  function selectGame(game: any) {
-    selectedGame = game;
+  async function selectGame(game: any) {
+    selectedGame = null;
     searchQuery = game.name;
     suggestions = [];
     showSuggestions = false;
     selectedIndex = -1;
+    
+    // Fetch detailed game information
+    try {
+      const response = await fetch(`${API_BASE_URL}/games/${game.id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch game details: ${response.status}`);
+      }
+      const gameDetails = await response.json();
+      selectedGame = gameDetails;
+      
+      console.log('Selected game details:', gameDetails);
+      
+    } catch (err: any) {
+      error = `Failed to load game details: ${err.message}`;
+      console.error('Error fetching game details:', err);
+    }
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -106,7 +121,7 @@
   }
 
   function handleBlur() {
-    // Small delay to allow suggestion clicks to register
+    // Small delay 
     setTimeout(() => {
       showSuggestions = false;
       selectedIndex = -1;
@@ -150,7 +165,12 @@
               on:click={() => handleSuggestionClick(game)}
             >
               <div class="suggestion-icon">{game.name.charAt(0)}</div>
-              {game.name}
+              <div class="suggestion-content">
+                <div class="suggestion-name">{game.name}</div>
+                {#if game.release_year}
+                  <div class="suggestion-year">{game.release_year}</div>
+                {/if}
+              </div>
             </div>
           {/each}
         {/if}
@@ -162,6 +182,29 @@
     <img src={searchIcon} alt="Search" />
   </button>
 </div>
+
+{#if selectedGame}
+  <div class="game-details">
+    <h3>Selected Game: {selectedGame.name}</h3>
+    <div class="game-info">
+      {#if selectedGame.release_year}
+        <p><strong>Release Year:</strong> {selectedGame.release_year}</p>
+      {/if}
+      {#if selectedGame.genres && selectedGame.genres.length > 0}
+        <p><strong>Genres:</strong> {selectedGame.genres.join(', ')}</p>
+      {/if}
+      {#if selectedGame.developers && selectedGame.developers.length > 0}
+        <p><strong>Developers:</strong> {selectedGame.developers.join(', ')}</p>
+      {/if}
+      {#if selectedGame.publishers && selectedGame.publishers.length > 0}
+        <p><strong>Publishers:</strong> {selectedGame.publishers.join(', ')}</p>
+      {/if}
+      {#if selectedGame.platforms && selectedGame.platforms.length > 0}
+        <p><strong>Platforms:</strong> {selectedGame.platforms.join(', ')}</p>
+      {/if}
+    </div>
+  </div>
+{/if}
 
 <style>
   .search-container {
@@ -199,7 +242,8 @@
 
   .search-input:focus {
     box-shadow:
-      -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
+      -4px 4px 4px 0px rgba(0, 0, 0, 0.15),
+      0 0 0 2px rgba(185, 219, 243, 0.5);
   }
 
   .search-button {
@@ -253,8 +297,6 @@
     display: flex;
     align-items: center;
     font-family: Inter;
-    font-size: 16px;
-    font-weight: 500;
   }
 
   .suggestion:last-child {
@@ -282,10 +324,32 @@
     color: #333;
     font-size: 14px;
     font-weight: bold;
+    flex-shrink: 0;
   }
 
   .suggestion.selected .suggestion-icon {
     background: rgba(255, 255, 255, 0.8);
+  }
+
+  .suggestion-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .suggestion-name {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .suggestion-year {
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
+    margin-top: 2px;
   }
 
   .no-results {
@@ -334,5 +398,33 @@
     margin: 8px;
     font-family: Inter;
     font-size: 14px;
+  }
+
+  /* Game details styles */
+  .game-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
+  }
+
+  .game-details h3 {
+    font-family: Inter;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+
+  .game-info p {
+    font-family: Inter;
+    font-size: 14px;
+    margin: 8px 0;
+    color: #555;
+  }
+
+  .game-info strong {
+    color: #333;
   }
 </style>

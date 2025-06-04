@@ -1,0 +1,33 @@
+/* Reset default spacing and ensure consistent box sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Default link styling: remove underline and use black text */
+a {
+  text-decoration: none;
+  color: black;
+}
+
+body {
+  background-color: #F3F4F8;
+}
+
+/* Container rule for direct children of body: center content with max widths */
+body > *{
+  margin: 2px auto;
+  justify-content: center;
+}
+
+/* Tablet breakpoint: hide sidebar and right divider, adjust logo and line colors */
+@media (max-width: 1024px) {
+  
+}
+
+/* Mobile breakpoint: further hide elements for narrow screens */
+@media (max-width: 767px) {
+  
+}
+

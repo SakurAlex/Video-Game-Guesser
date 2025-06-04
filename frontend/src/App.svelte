@@ -41,15 +41,10 @@
   fetchInitialRandomGame();
 
   async function handleGiveUpEvent() {
-    // Clear state immediately
     remainingAttempts = 10;
     guesses = [];
     correctGame = null;
 
-    // Wait for next tick to ensure UI updates
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    // Then fetch new game
     await fetchInitialRandomGame();
   }
 
@@ -70,7 +65,6 @@
   }
 
   function compareArrays(guessArray: string[], correctArray: string[]): string {
-    // Check if there's any overlap between the arrays
     const hasMatch = guessArray.some((item) =>
       correctArray.some(
         (correctItem) =>
@@ -122,7 +116,6 @@
   }
 
   async function LostEvent() {
-    // Show the answer first
     const answerMessage = `
 You Lost! Here's the correct answer:
 
@@ -134,16 +127,9 @@ Publishers: ${correctGame.publishers.join(", ")}
 Platforms: ${correctGame.platforms.join(", ")}
     `;
     alert(answerMessage);
-
-    // Clear state immediately
     remainingAttempts = 10;
     guesses = [];
     correctGame = null;
-
-    // Wait for next tick to ensure UI updates
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    // Then fetch new game
     await fetchInitialRandomGame();
   }
 </script>

@@ -1,20 +1,20 @@
 <script lang="ts">
-  import rightIcon from './assets/right.svg';
-  import settingsIcon from './assets/settings.svg';
-  import homeIcon from './assets/home.svg';
-  import helpIcon from './assets/question.svg';
-  import githubIcon from './assets/github.svg';
-  
+  import rightIcon from "./assets/right.svg";
+  import settingsIcon from "./assets/settings.svg";
+  import homeIcon from "./assets/home.svg";
+  import helpIcon from "./assets/question.svg";
+  import githubIcon from "./assets/github.svg";
+
   let showHelptutorials = false;
-  
+
   function openHelptutorials() {
     showHelptutorials = true;
   }
-  
+
   function closeHelptutorials() {
     showHelptutorials = false;
   }
-  
+
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       closeHelptutorials();
@@ -28,11 +28,15 @@
     <img src={rightIcon} alt="rightArrow" class="arrow-icon" />
   </div>
   <div class="navigation-buttons">
-    <button class="navigation-button"><img src={settingsIcon} alt="settings" /></button>
+    <button class="navigation-button"
+      ><img src={settingsIcon} alt="settings" /></button
+    >
     <button class="navigation-button">
       <a href="localhost:3000"><img src={homeIcon} alt="home" /></a>
     </button>
-    <button class="navigation-button" on:click={openHelptutorials}><img src={helpIcon} alt="help" /></button>
+    <button class="navigation-button" on:click={openHelptutorials}
+      ><img src={helpIcon} alt="help" /></button
+    >
     <button class="navigation-button">
       <a href="https://github.com/SakurAlex/Game-Guesser" target="_blank">
         <img src={githubIcon} alt="github" />
@@ -47,17 +51,21 @@
     <div class="tutorials-content">
       <div class="tutorials-header">
         <h2>How to use GameGuesser</h2>
-        <button class="close-button" on:click={closeHelptutorials}>&times;</button>
+        <button class="close-button" on:click={closeHelptutorials}
+          >&times;</button
+        >
       </div>
       <div class="tutorials-body">
         <div class="help-section">
-          <p>This is a small game to guess the game! </p>
+          <p>This is a small game to guess the game!</p>
           <p>You have 10 chances (default) to guess the correct game.</p>
         </div>
         <div class="help-section">
           <h3>How to start</h3>
           <ul>
-            <li>Input the name of the game you want to guess in the search bar</li>
+            <li>
+              Input the name of the game you want to guess in the search bar
+            </li>
             <li>Click the blue search button to make a guess</li>
             <li>Check the hint information to adjust your next guess</li>
           </ul>
@@ -94,7 +102,7 @@
     font-size: 18px;
     font-style: normal;
     font-weight: 600;
-    color: #B3B5BD;
+    color: #b3b5bd;
   }
 
   .arrow-icon {
@@ -157,21 +165,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 16px 8px 16px;
-    border-bottom: 1px solid #E5E5E5;
+    border-bottom: 1px solid #e5e5e5;
   }
 
   .tutorials-header h2 {
     margin: 0;
     font-size: 24px;
     font-weight: 700;
-    color: #2C3E50;
+    color: #2c3e50;
   }
 
   .close-button {
     background: none;
     border: none;
     font-size: 32px;
-    color: #9CA3AB;
+    color: #9ca3ab;
     cursor: pointer;
     padding: 0;
     width: 40px;
@@ -184,7 +192,7 @@
   }
 
   .close-button:hover {
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
   }
 
   .tutorials-body {
@@ -203,14 +211,14 @@
     margin: 0 0 6px 0;
     font-size: 18px;
     font-weight: 600;
-    color: #2C3E50;
+    color: #2c3e50;
   }
 
   .help-section p {
     margin: 0px 0;
     font-size: 16px;
     line-height: 1.5;
-    color: #67666E;
+    color: #67666e;
   }
 
   .help-section ul {
@@ -221,7 +229,7 @@
   .help-section li {
     margin: 6px 0;
     font-size: 16px;
-    color: #67666E;
+    color: #67666e;
   }
 
   @media (max-width: 640px) {
@@ -249,7 +257,8 @@
       width: 95%;
     }
 
-    .tutorials-header, .tutorials-body {
+    .tutorials-header,
+    .tutorials-body {
       padding: 16px;
     }
 
@@ -268,7 +277,8 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       transform: scale(1);
     }
     50% {

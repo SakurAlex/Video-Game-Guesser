@@ -1,6 +1,6 @@
 <script lang="ts">
   import searchIcon from "./assets/search.svg";
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from "svelte";
 
   let searchQuery = "";
   let suggestions: any[] = [];
@@ -36,8 +36,11 @@
     isLoading = true;
     error = null;
     try {
-      const response = await fetch(`${API_BASE_URL}/games/search?q=${encodeURIComponent(query)}&limit=10`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const response = await fetch(
+        `${API_BASE_URL}/games/search?q=${encodeURIComponent(query)}&limit=10`,
+      );
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       suggestions = data.results || [];
       showSuggestions = suggestions.length > 0;
@@ -53,25 +56,26 @@
 
   async function selectGame(game: any) {
     selectedGame = null;
-    searchQuery = ""; 
+    searchQuery = "";
     suggestions = [];
     showSuggestions = false;
     selectedIndex = -1;
 
     try {
       const response = await fetch(`${API_BASE_URL}/games/${game.id}`);
-      if (!response.ok) throw new Error(`Failed to fetch game details: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch game details: ${response.status}`);
       const gameDetails = await response.json();
       selectedGame = gameDetails;
 
       if (selectedGame) {
-        dispatch('gameGuessed', {
+        dispatch("gameGuessed", {
           gameName: selectedGame.name,
           releaseYear: selectedGame.release_year,
           genres: selectedGame.genres,
           developers: selectedGame.developers,
           publishers: selectedGame.publishers,
-          platforms: selectedGame.platforms
+          platforms: selectedGame.platforms,
         });
       }
     } catch (err: any) {
@@ -126,7 +130,6 @@
     selectGame(game);
   }
 </script>
-
 
 <div class="search-container">
   <div class="input-wrapper">

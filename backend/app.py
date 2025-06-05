@@ -1,9 +1,12 @@
-from flask import Flask, jsonify, send_from_directory, request
+from flask import Flask, jsonify, send_from_directory, request, session
 import os
 import requests
 import time
 import difflib
 import random 
+import hashlib
+import sqlite3
+from functools import wraps
 from flask_cors import CORS
 
 # Configuration
@@ -16,9 +19,45 @@ IGDB_BASE_URL = "https://api.igdb.com/v4"
 
 # App setup
 app = Flask(__name__, static_folder=static_path, template_folder=template_path)
-CORS(app)
+app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
+CORS(app, supports_credentials=True)
 
-# Token management
+# Database setup
+def init_db():
+    """Initialize the database with required tables"""
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    
+    # Users table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # User stats table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_stats (
+            user_id INTEGER PRIMARY KEY,
+            total_games INTEGER DEFAULT 0,
+            games_won INTEGER DEFAULT 0,
+            total_attempts INTEGER DEFAULT 0,
+            best_attempts INTEGER,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+# Initialize database on startup
+init_db()
+
+# Token management for IGDB API
 access_token = None
 token_expires_at = 0
 
@@ -68,26 +107,90 @@ def igdb_request(endpoint, query):
         print(f"IGDB error: {e}")
         return None
 
+def hash_password(password):
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def require_auth(f):
+    """Decorator to require authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Authentication required'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
+def get_user_stats(user_id):
+    """Get user statistics"""
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM user_stats WHERE user_id = ?', (user_id,))
+    stats = cursor.fetchone()
+    conn.close()
+    
+    if not stats:
+        return {
+            'total_games': 0,
+            'games_won': 0,
+            'total_attempts': 0,
+            'best_attempts': None,
+            'win_rate': 0
+        }
+    
+    return {
+        'total_games': stats[1],
+        'games_won': stats[2],
+        'total_attempts': stats[3],
+        'best_attempts': stats[4],
+        'win_rate': round((stats[2] / stats[1] * 100) if stats[1] > 0 else 0, 1)
+    }
+
+def update_user_stats(user_id, won, attempts):
+    """Update user statistics"""
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    
+    # Get current stats
+    cursor.execute('SELECT * FROM user_stats WHERE user_id = ?', (user_id,))
+    current = cursor.fetchone()
+    
+    if current:
+        new_total_games = current[1] + 1
+        new_games_won = current[2] + (1 if won else 0)
+        new_total_attempts = current[3] + attempts
+        new_best_attempts = min(current[4], attempts) if current[4] and won else (attempts if won else current[4])
+        
+        cursor.execute('''
+            UPDATE user_stats 
+            SET total_games = ?, games_won = ?, total_attempts = ?, best_attempts = ?
+            WHERE user_id = ?
+        ''', (new_total_games, new_games_won, new_total_attempts, new_best_attempts, user_id))
+    else:
+        cursor.execute('''
+            INSERT INTO user_stats (user_id, total_games, games_won, total_attempts, best_attempts)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (user_id, 1, 1 if won else 0, attempts, attempts if won else None))
+    
+    conn.commit()
+    conn.close()
+
+# Game logic functions (existing)
 def score_match(game_name, search_term):
     """Score how well a game matches the search term"""
     game_lower = game_name.lower()
     search_lower = search_term.lower()
     
-    # Exact match
     if game_lower == search_lower:
         return 1000
     
-    # Starts with search
     if game_lower.startswith(search_lower):
         return 900
     
-    # Word starts with search
     words = game_lower.split()
     for word in words:
         if word.startswith(search_lower):
             return 700
     
-    # Multi-word matching
     search_words = search_lower.split()
     if len(search_words) > 1:
         matches = 0
@@ -106,16 +209,13 @@ def score_match(game_name, search_term):
         elif match_ratio >= 0.6:
             return 400
     
-    # Contains search
     if search_lower in game_lower:
         return 300
     
-    # Fuzzy match
     similarity = difflib.SequenceMatcher(None, search_lower, game_lower).ratio()
     if similarity > 0.7:
         return int(similarity * 200)
     
-    # Partial word match
     for word in words:
         if search_lower in word:
             return 100
@@ -172,7 +272,6 @@ limit 30;'''
                 'score': score
             })
     
-    # Return top results
     scored_games.sort(key=lambda x: x['score'], reverse=True)
     return [item['game'] for item in scored_games[:limit]]
 
@@ -214,34 +313,110 @@ def get_game_info(game_id):
         'publishers': publishers,
         'platforms': platforms
     }
-@app.route('/api/games/random', methods=['GET'])
-
-def get_random_game():
+# Auth Endpoints
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    """Register a new user"""
+    data = request.get_json()
+    
+    if not data or not all(k in data for k in ['username', 'email', 'password']):
+        return jsonify({'error': 'Username, email, and password are required'}), 400
+    
+    username = data['username'].strip()
+    email = data['email'].strip()
+    password = data['password']
+    
+    # Basic length checks
+    if len(username) < 3:
+        return jsonify({'error': 'Username must be at least 3 characters long'}), 400
+    
+    if len(password) < 6:
+        return jsonify({'error': 'Password must be at least 6 characters long'}), 400
+    
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    
     try:
-        query = '''
-        fields name, first_release_date, genres.name, involved_companies.company.name, 
-        involved_companies.developer, involved_companies.publisher, platforms.name;
-        where category = 0;
-        limit 200;
-        sort popularity desc;
-        '''
-        games = igdb_request('games', query)
-        if not games:
-            return jsonify({'error': 'No games found'}), 404
+        cursor.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+                      (username, email, hash_password(password)))
+        user_id = cursor.lastrowid
+        conn.commit()
+
+        # Persist session so subsequent requests are authenticated
+        session['user_id'] = user_id
+        session['username'] = username
         
-        game = random.choice(games)
-
-        detailed_game = get_game_info(game['id'])
-        if not detailed_game:
-            return jsonify({'error': 'Could not fetch game details'}), 500
-
-        return jsonify(detailed_game)
+        return jsonify({
+            'message': 'User registered successfully',
+            'user': {'id': user_id, 'username': username, 'email': email}
+        }), 201
         
-    except Exception as e:
-        print(f"Random game error: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
+    except sqlite3.IntegrityError as e:
+        if 'username' in str(e):
+            return jsonify({'error': 'Username already exists'}), 400
+        elif 'email' in str(e):
+            return jsonify({'error': 'Email already exists'}), 400
+        else:
+            return jsonify({'error': 'Registration failed'}), 400
+    finally:
+        conn.close()
 
-# Routes
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """Login user"""
+    data = request.get_json()
+    
+    if not data or not all(k in data for k in ['username', 'password']):
+        return jsonify({'error': 'Username and password are required'}), 400
+    
+    username = data['username'].strip()
+    password = data['password']
+    
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, username, email, password_hash FROM users WHERE username = ?', (username,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user or user[3] != hash_password(password):
+        return jsonify({'error': 'Invalid username or password'}), 401
+    
+    session['user_id'] = user[0]
+    session['username'] = user[1]
+    
+    return jsonify({
+        'message': 'Login successful',
+        'user': {'id': user[0], 'username': user[1], 'email': user[2]}
+    })
+
+@app.route('/api/auth/logout', methods=['POST'])
+def logout():
+    """Logout user"""
+    session.clear()
+    return jsonify({'message': 'Logout successful'})
+
+@app.route('/api/auth/me', methods=['GET'])
+@require_auth
+def get_current_user():
+    """Get current user info"""
+    user_id = session['user_id']
+    
+    conn = sqlite3.connect('game_guess.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, username, email FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    stats = get_user_stats(user_id)
+    
+    return jsonify({
+        'user': {'id': user[0], 'username': user[1], 'email': user[2]},
+        'stats': stats
+    })
+
 @app.route('/api/health')
 def health_check():
     return jsonify({"status": "healthy", "message": "backend service is running"})
@@ -250,13 +425,16 @@ def health_check():
 def get_key():
     return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
 
+# Static Frontend Fallback
 @app.route('/')
 @app.route('/<path:path>')
 def serve_frontend(path=''):
     if path and os.path.exists(os.path.join(static_path, path)):
         return send_from_directory(static_path, path)
+    # Otherwise fall back to index.html so client‑side routing works
     return send_from_directory(template_path, 'index.html')
 
+# Game Endpoints
 @app.route('/api/games/search', methods=['GET'])
 def search_endpoint():
     """Search for games"""
@@ -296,6 +474,56 @@ def game_details(game_id):
         print(f"Game details error: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/games/random', methods=['GET'])
+def get_random_game():
+    try:
+        query = '''
+        fields name, first_release_date, genres.name, involved_companies.company.name, 
+        involved_companies.developer, involved_companies.publisher, platforms.name;
+        where category = 0;
+        limit 200;
+        sort popularity desc;
+        '''
+        games = igdb_request('games', query)
+        if not games:
+            return jsonify({'error': 'No games found'}), 404
+        
+        game = random.choice(games)
+        detailed_game = get_game_info(game['id'])
+        if not detailed_game:
+            return jsonify({'error': 'Could not fetch game details'}), 500
+
+        return jsonify(detailed_game)
+        
+    except Exception as e:
+        print(f"Random game error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/game/win', methods=['POST'])
+@require_auth
+def record_win():
+    """Record a game win"""
+    data = request.get_json()
+    attempts = data.get('attempts', 10)
+    
+    user_id = session['user_id']
+    update_user_stats(user_id, True, attempts)
+    
+    return jsonify({'message': 'Win recorded successfully'})
+
+@app.route('/api/game/loss', methods=['POST'])
+@require_auth
+def record_loss():
+    """Record a game loss"""
+    data = request.get_json()
+    attempts = data.get('attempts', 10)
+    
+    user_id = session['user_id']
+    update_user_stats(user_id, False, attempts)
+    
+    return jsonify({'message': 'Loss recorded successfully'})
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port, debug=True)
+    

@@ -1,11 +1,17 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import rightIcon from "./assets/right.svg";
   import settingsIcon from "./assets/settings.svg";
   import homeIcon from "./assets/home.svg";
   import helpIcon from "./assets/question.svg";
   import githubIcon from "./assets/github.svg";
 
+  // User Status
+  export let user = null;
+
   let showHelptutorials = false;
+
+  const dispatch = createEventDispatcher();
 
   function openHelptutorials() {
     showHelptutorials = true;
@@ -20,6 +26,16 @@
       closeHelptutorials();
     }
   }
+
+  // Processing of personal data clicks
+  function handleProfileClick() {
+    dispatch('showProfile');
+  }
+
+  // Handle login clicks
+  function handleLoginClick() {
+    dispatch('showLogin');
+  }
 </script>
 
 <nav class="navigation-bar">
@@ -28,6 +44,22 @@
     <img src={rightIcon} alt="rightArrow" class="arrow-icon" />
   </div>
   <div class="navigation-buttons">
+    <!-- User status display -->
+    {#if user}
+      <div class="user-section">
+        <button class="user-button" on:click={handleProfileClick}>
+          <div class="user-avatar">
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+          <span class="username">{user.username}</span>
+        </button>
+      </div>
+    {:else}
+      <button class="login-nav-button" on:click={handleLoginClick}>
+        Login
+      </button>
+    {/if}
+    
     <button class="navigation-button"
       ><img src={settingsIcon} alt="settings" /></button
     >
@@ -70,6 +102,24 @@
             <li>Check the hint information to adjust your next guess</li>
           </ul>
         </div>
+        <!-- Login related help -->
+        {#if user}
+          <div class="help-section">
+            <h3>Your Profile</h3>
+            <ul>
+              <li>Click on your username to view your game statistics</li>
+              <li>Track your win rate and best scores</li>
+            </ul>
+          </div>
+        {:else}
+          <div class="help-section">
+            <h3>Create Account</h3>
+            <ul>
+              <li>Click "Login" to create an account or sign in</li>
+              <li>Track your progress and view statistics</li>
+            </ul>
+          </div>
+        {/if}
       </div>
     </div>
   </div>
@@ -139,7 +189,71 @@
     object-fit: contain;
   }
 
-  /* tutorials styles */
+  /* User related styles */
+  .user-section {
+    margin-right: 8px;
+  }
+
+  .user-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f9fa;
+    border: 2px solid #e1e5e9;
+    border-radius: 23px;
+    padding: 4px 12px 4px 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 46px;
+  }
+
+  .user-button:hover {
+    background: #b9dbf3;
+    border-color: #a5d0e8;
+  }
+
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #b9dbf3, #a5d0e8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+
+  .username {
+    font-family: Inter;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .login-nav-button {
+    background: #b9dbf3;
+    border: none;
+    border-radius: 23px;
+    padding: 0 16px;
+    height: 46px;
+    cursor: pointer;
+    font-family: Inter;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    transition: background-color 0.2s ease;
+  }
+
+  .login-nav-button:hover {
+    background: #a5d0e8;
+  }
+
   .tutorials-overlay {
     position: fixed;
     top: 0;
@@ -251,6 +365,28 @@
     .navigation-button {
       width: 32px;
       height: 32px;
+    }
+
+    .user-button {
+      height: 36px;
+      padding: 2px 8px 2px 2px;
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+    }
+
+    .username {
+      font-size: 12px;
+      max-width: 60px;
+    }
+
+    .login-nav-button {
+      height: 36px;
+      padding: 0 12px;
+      font-size: 12px;
     }
 
     .tutorials-content {

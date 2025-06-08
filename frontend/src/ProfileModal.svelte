@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-
+  import userCover from "./assets/default_user.svg";
   export let isVisible = false;
   export let user = null;
   export let stats = null;
@@ -76,8 +76,8 @@
       <div class="profile-body">
         {#if user}
           <div class="user-info">
-            <div class="avatar">
-              {user.username.charAt(0).toUpperCase()}
+            <div class="user-image">
+              <img src={userCover} alt="user-cover" class="user-cover" />
             </div>
             <div class="user-details">
               <h3>{user.username}</h3>
@@ -243,10 +243,9 @@
     border-radius: 12px;
   }
 
-  .avatar {
+  .user-image {
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #b9dbf3, #a5d0e8);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -255,6 +254,11 @@
     font-weight: bold;
     color: #2c3e50;
     margin-right: 20px;
+  }
+
+  .user-cover {
+    width: 100%;
+    height: 100%;
   }
 
   .user-details h3 {

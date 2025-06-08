@@ -42,7 +42,7 @@
     }
   }
 
-  // 新增：获取用户统计
+  // new feature: refresh user stats
   async function refreshUserStats() {
     if (!user) return;
     

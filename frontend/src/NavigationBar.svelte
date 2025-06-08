@@ -44,21 +44,6 @@
     <img src={rightIcon} alt="rightArrow" class="arrow-icon" />
   </div>
   <div class="navigation-buttons">
-    <!-- User status display -->
-    {#if user}
-      <div class="user-section">
-        <button class="user-button" on:click={handleProfileClick}>
-          <div class="user-avatar">
-            {user.username.charAt(0).toUpperCase()}
-          </div>
-          <span class="username">{user.username}</span>
-        </button>
-      </div>
-    {:else}
-      <button class="login-nav-button" on:click={handleLoginClick}>
-        Login
-      </button>
-    {/if}
     
     <button class="navigation-button"
       ><img src={settingsIcon} alt="settings" /></button
@@ -74,6 +59,25 @@
         <img src={githubIcon} alt="github" />
       </a>
     </button>
+    
+    <!-- User status display -->
+    {#if user}
+      <div class="user-section">
+        
+        <button class="user-button" on:click={handleProfileClick}>
+          <!--
+          <div class="user-avatar">
+            {user.username.charAt(0).toUpperCase()}
+          </div>
+          -->
+          <span class="username">{user.username}</span>
+        </button>
+      </div>
+    {:else}
+      <button class="login-nav-button" on:click={handleLoginClick}>
+        Login
+      </button>
+    {/if}
   </div>
 </nav>
 
@@ -201,7 +205,7 @@
     background: #f8f9fa;
     border: 2px solid #e1e5e9;
     border-radius: 23px;
-    padding: 4px 12px 4px 4px;
+    padding: 4px 12px 4px 12px;
     cursor: pointer;
     transition: all 0.2s ease;
     height: 46px;

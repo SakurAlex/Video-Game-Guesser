@@ -7,6 +7,7 @@
   <table>
     <thead>
       <tr>
+        <th>Cover</th>
         <th>Game name</th>
         <th>Release year</th>
         <th>Genre</th>
@@ -18,13 +19,20 @@
     <tbody>
       {#if guesses.length === 0}
         <tr>
-          <td colspan="6" class="empty-message">
+          <td colspan="7" class="empty-message">
             🎮 No guesses yet. Try your first one by entering a game name above.
           </td>
         </tr>
       {:else}
         {#each guesses as guess}
           <tr>
+            <td class="cover-image">
+              {#if guess.cover_url}
+                <img src={guess.cover_url} alt="cover" class="cover-image" />
+              {:else}
+                <span>🎮</span>
+              {/if}
+            </td>
             <td>{guess.gameName}</td>
             <td>
               {guess.releaseYear}
@@ -37,40 +45,32 @@
               {/if}
             </td>
             <td>
-              {#if guess.genreStatus === "green"}
-                <span style="color: green;">{guess.genres.join(", ")}</span>
-              {:else if guess.genreStatus === "red"}
-                <span style="color: red;">{guess.genres.join(", ")}</span>
-              {:else}
-                <span>{guess.genres.join(", ")}</span>
-              {/if}
+              <div class="tags-container">
+                {#each (guess.genres || []) as genre}
+                  <span class="tag {guess.genreStatus || 'default'}">{genre}</span>
+                {/each}
+              </div>
             </td>
             <td>
-              {#if guess.developerStatus === "green"}
-                <span style="color: green;">{guess.developers.join(", ")}</span>
-              {:else if guess.developerStatus === "red"}
-                <span style="color: red;">{guess.developers.join(", ")}</span>
-              {:else}
-                <span>{guess.developers.join(", ")}</span>
-              {/if}
+              <div class="tags-container">
+                {#each (guess.developers || []) as developer}
+                  <span class="tag {guess.developerStatus || 'default'}">{developer}</span>
+                {/each}
+              </div>
             </td>
             <td>
-              {#if guess.publisherStatus === "green"}
-                <span style="color: green;">{guess.publishers.join(", ")}</span>
-              {:else if guess.publisherStatus === "red"}
-                <span style="color: red;">{guess.publishers.join(", ")}</span>
-              {:else}
-                <span>{guess.publishers.join(", ")}</span>
-              {/if}
+              <div class="tags-container">
+                {#each (guess.publishers || []) as publisher}
+                  <span class="tag {guess.publisherStatus || 'default'}">{publisher}</span>
+                {/each}
+              </div>
             </td>
             <td>
-              {#if guess.platformStatus === "green"}
-                <span style="color: green;">{guess.platforms.join(", ")}</span>
-              {:else if guess.platformStatus === "red"}
-                <span style="color: red;">{guess.platforms.join(", ")}</span>
-              {:else}
-                <span>{guess.platforms.join(", ")}</span>
-              {/if}
+              <div class="tags-container">
+                {#each (guess.platforms || []) as platform}
+                  <span class="tag {guess.platformStatus || 'default'}">{platform}</span>
+                {/each}
+              </div>
             </td>
           </tr>
         {/each}
@@ -86,7 +86,7 @@
     overflow: hidden;
     box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
     margin: 20px auto;
-    max-width: 1050px;
+    max-width: 1300px;
   }
 
   table {
@@ -100,16 +100,18 @@
 
   th {
     padding: 12px 30px;
-    text-align: left;
+    text-align: center;
     font-size: 22px;
     font-weight: bold;
     color: #2c3e50;
   }
 
   td {
-    padding: 16px;
+    padding: 14px;
+    font-size: 18px; 
+    font-weight: bold;
     color: #2c3e50;
-    text-align: left;
+    text-align: center;
   }
 
   .empty-message {
@@ -117,5 +119,53 @@
     font-size: 22px;
     font-weight: bold;
     color: #9ca3ab;
+  }
+
+  .cover-image img {
+    width: 100px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+  }
+
+  .cover-image {
+    text-align: center;
+  }
+
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .tag.green {
+    background-color: #50B973;
+    color: white;
+  }
+
+  .tag.red {
+    background-color: #EC5C5C;
+    color: white;
+    border: none;
+  }
+
+  .tag.default {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
   }
 </style>

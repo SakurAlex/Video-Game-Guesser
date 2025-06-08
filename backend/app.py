@@ -232,7 +232,7 @@ def search_games(query, limit=20):
     
     # Direct search
     direct_query = f'''search "{search_term}";
-fields name, first_release_date;
+fields name, first_release_date, cover.url;
 where category = 0;
 limit 50;'''
     
@@ -244,7 +244,7 @@ limit 50;'''
     words = [w for w in search_term.lower().split() if len(w) >= 3]
     for word in words:
         word_query = f'''search "{word}";
-fields name, first_release_date;
+fields name, first_release_date, cover.url;
 where category = 0;
 limit 30;'''
         
@@ -263,11 +263,15 @@ limit 30;'''
             if game.get('first_release_date'):
                 release_year = time.strftime('%Y', time.gmtime(game['first_release_date']))
             
+            # Process cover URL
+            cover_url = process_cover_url(game.get('cover'))
+            
             scored_games.append({
                 'game': {
                     'id': game['id'],
                     'name': game['name'],
-                    'release_year': release_year
+                    'release_year': release_year,
+                    'cover_url': cover_url
                 },
                 'score': score
             })
@@ -275,9 +279,25 @@ limit 30;'''
     scored_games.sort(key=lambda x: x['score'], reverse=True)
     return [item['game'] for item in scored_games[:limit]]
 
+def process_cover_url(cover_data):
+    """Process IGDB cover URL"""
+    if not cover_data:
+        return None
+    
+    if isinstance(cover_data, dict) and 'url' in cover_data:
+        url = cover_data['url']
+        
+        # IGDB cover URL format: //images.igdb.com/igdb/image/upload/t_thumb/xxxxx.jpg
+        if url.startswith('//'):
+            return f"https:{url}"
+        elif url.startswith('http'):
+            return url
+    
+    return None
+
 def get_game_info(game_id):
     """Get detailed game information"""
-    query = f'''fields name, first_release_date, genres.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, platforms.name;where id = {game_id};'''
+    query = f'''fields name, first_release_date, genres.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, platforms.name, cover.url;where id = {game_id};'''
     
     games = igdb_request('games', query)
     if not games:
@@ -304,6 +324,9 @@ def get_game_info(game_id):
     
     platforms = [p['name'] for p in game.get('platforms', [])]
     
+    # cover URL
+    cover_url = process_cover_url(game.get('cover'))
+    
     return {
         'id': game['id'],
         'name': game['name'],
@@ -311,7 +334,8 @@ def get_game_info(game_id):
         'genres': genres,
         'developers': developers,
         'publishers': publishers,
-        'platforms': platforms
+        'platforms': platforms,
+        'cover_url': cover_url
     }
 # Auth Endpoints
 @app.route('/api/auth/register', methods=['POST'])
@@ -421,6 +445,8 @@ def get_current_user():
 def health_check():
     return jsonify({"status": "healthy", "message": "backend service is running"})
 
+
+
 @app.route('/api/key')
 def get_key():
     return jsonify({'apiKey': os.getenv('NYT_API_KEY')})
@@ -479,7 +505,7 @@ def get_random_game():
     try:
         query = '''
         fields name, first_release_date, genres.name, involved_companies.company.name, 
-        involved_companies.developer, involved_companies.publisher, platforms.name;
+        involved_companies.developer, involved_companies.publisher, platforms.name, cover.url;
         where category = 0;
         limit 200;
         sort popularity desc;

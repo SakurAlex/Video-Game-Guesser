@@ -95,6 +95,7 @@
         developers: randomGameDetails.developers || [],
         publishers: randomGameDetails.publishers || [],
         platforms: randomGameDetails.platforms || [],
+        cover_url: randomGameDetails.cover_url,
         arrow: "",
         genreStatus: "",
         developerStatus: "",

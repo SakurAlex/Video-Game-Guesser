@@ -9,7 +9,7 @@
   let error: string | null = null;
   let selectedGame: any = null;
   let showSuggestions = false;
-  let searchTimeout: NodeJS.Timeout | null = null;
+  let searchTimeout: number | null = null;
   let suggestionsContainer: HTMLElement;
 
   const API_BASE_URL = "http://localhost:8000/api";
@@ -76,6 +76,7 @@
           developers: selectedGame.developers,
           publishers: selectedGame.publishers,
           platforms: selectedGame.platforms,
+          cover_url: selectedGame.cover_url,
         });
       }
     } catch (err: any) {
@@ -162,7 +163,13 @@
               class="suggestion {index === selectedIndex ? 'selected' : ''}"
               on:click={() => handleSuggestionClick(game)}
             >
-              <div class="suggestion-icon">{game.name.charAt(0)}</div>
+              <div class="suggestion-icon">
+                {#if game.cover_url}
+                  <img src={game.cover_url} alt="cover" class="suggestion-cover" />
+                {:else}
+                  {game.name.charAt(0)}
+                {/if}
+              </div>
               <div class="suggestion-content">
                 <div class="suggestion-name">{game.name}</div>
                 {#if game.release_year}
@@ -241,7 +248,6 @@
   .search-input:focus {
     box-shadow:
       -4px 4px 4px 0px rgba(0, 0, 0, 0.15),
-      0 0 0 2px rgba(185, 219, 243, 0.5);
   }
 
   .search-button {
@@ -312,8 +318,8 @@
 
   .suggestion-icon {
     margin-right: 12px;
-    width: 32px;
-    height: 32px;
+    width: 45px;
+    height: 45px;
     background: #b9dbf3;
     border-radius: 8px;
     display: flex;
@@ -327,6 +333,13 @@
 
   .suggestion.selected .suggestion-icon {
     background: rgba(255, 255, 255, 0.8);
+  }
+
+  .suggestion-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
   }
 
   .suggestion-content {

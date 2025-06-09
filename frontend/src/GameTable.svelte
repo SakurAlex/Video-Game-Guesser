@@ -46,29 +46,40 @@
             </td>
             <td>
               <div class="tags-container">
-                {#each (guess.genres || []) as genre}
-                  <span class="tag {guess.genreStatus || 'default'}">{genre}</span>
+                {#each guess.genres || [] as genre, index}
+                  <span class="tag {guess.genreStatuses?.[index] || 'default'}"
+                    >{genre}</span
+                  >
                 {/each}
               </div>
             </td>
             <td>
               <div class="tags-container">
-                {#each (guess.developers || []) as developer}
-                  <span class="tag {guess.developerStatus || 'default'}">{developer}</span>
+                {#each guess.developers || [] as developer, index}
+                  <span
+                    class="tag {guess.developerStatuses?.[index] || 'default'}"
+                    >{developer}</span
+                  >
                 {/each}
               </div>
             </td>
             <td>
               <div class="tags-container">
-                {#each (guess.publishers || []) as publisher}
-                  <span class="tag {guess.publisherStatus || 'default'}">{publisher}</span>
+                {#each guess.publishers || [] as publisher, index}
+                  <span
+                    class="tag {guess.publisherStatuses?.[index] || 'default'}"
+                    >{publisher}</span
+                  >
                 {/each}
               </div>
             </td>
             <td>
               <div class="tags-container">
-                {#each (guess.platforms || []) as platform}
-                  <span class="tag {guess.platformStatus || 'default'}">{platform}</span>
+                {#each guess.platforms || [] as platform, index}
+                  <span
+                    class="tag {guess.platformStatuses?.[index] || 'default'}"
+                    >{platform}</span
+                  >
                 {/each}
               </div>
             </td>
@@ -88,16 +99,13 @@
     margin: 20px auto;
     max-width: 1300px;
   }
-
   table {
     border-collapse: collapse;
     width: 100%;
   }
-
   thead {
     background-color: #ddebf5;
   }
-
   th {
     padding: 12px 30px;
     text-align: center;
@@ -105,22 +113,19 @@
     font-weight: bold;
     color: #2c3e50;
   }
-
   td {
     padding: 14px;
-    font-size: 18px; 
+    font-size: 18px;
     font-weight: bold;
     color: #2c3e50;
     text-align: center;
   }
-
   .empty-message {
     text-align: center;
     font-size: 22px;
     font-weight: bold;
     color: #9ca3ab;
   }
-
   .cover-image img {
     width: 100px;
     height: 80px;
@@ -128,11 +133,9 @@
     border-radius: 10px;
     border: 1px solid #ddd;
   }
-
   .cover-image {
     text-align: center;
   }
-
   .tags-container {
     display: flex;
     flex-wrap: wrap;
@@ -140,7 +143,6 @@
     align-items: center;
     justify-content: center;
   }
-
   .tag {
     display: inline-block;
     padding: 5px 9px;
@@ -151,18 +153,15 @@
     border: 1px solid transparent;
     transition: all 0.2s ease;
   }
-
   .tag.green {
-    background-color: #50B973;
+    background-color: #50b973;
     color: white;
   }
-
   .tag.red {
-    background-color: #EC5C5C;
+    background-color: #ec5c5c;
     color: white;
     border: none;
   }
-
   .tag.default {
     background-color: #e0e0e0;
     color: #333;

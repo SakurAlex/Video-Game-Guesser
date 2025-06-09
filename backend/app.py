@@ -635,7 +635,18 @@ def get_random_game():
         query  = "fields id, name;"
         if where_clauses:
             query += " where " + " & ".join(where_clauses) + ";"
-        query += " sort total_rating_count desc;"
+        
+        sort_options = [
+            "total_rating_count desc",
+            "name asc", 
+            "first_release_date desc",
+            "total_rating desc"
+        ]
+        random_sort = random.choice(sort_options)
+        query += f" sort {random_sort};"
+        random_offset = random.randint(0, 300)
+        query += f" limit 100; offset {random_offset};"
+
         filtered = igdb_request('games', query) or []
         if not filtered:
             return jsonify({'error': 'No games match those filters'}), 404

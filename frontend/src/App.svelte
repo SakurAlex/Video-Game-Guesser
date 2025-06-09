@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy } from "svelte";
   import NavigationBar from "./NavigationBar.svelte";
   import SearchBar from "./SearchBar.svelte";
   import GameStatus from "./GameStatus.svelte";
   import GameTable from "./GameTable.svelte";
   import LoginModal from "./LoginModal.svelte";
   import ProfileModal from "./ProfileModal.svelte";
-  import { filters } from './stores/filterStore.js';
+  import { filters } from "./stores/filterStore.js";
   import type { GameGuess } from "./types";
 
   // User state management
@@ -26,29 +26,29 @@
   const API_BASE_URL = "http://localhost:8000/api";
 
   let currentFilters: {
-    year: number|null,
-    platforms: string[],
-    genres: string[],
-    topTier: number|null
+    year: number | null;
+    platforms: string[];
+    genres: string[];
+    topTier: number | null;
   } = { year: null, platforms: [], genres: [], topTier: null };
- 
-  const unsubFilters = filters.subscribe(f => currentFilters = f);
+
+  const unsubFilters = filters.subscribe((f) => (currentFilters = f));
   onDestroy(unsubFilters);
 
   // Check user login status
   async function checkAuthStatus() {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        credentials: 'include'
+        credentials: "include",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         user = data.user;
         userStats = data.stats;
       }
     } catch (err) {
-      console.log('No active session');
+      console.log("No active session");
     } finally {
       authChecked = true;
     }
@@ -57,50 +57,51 @@
   // new feature: refresh user stats
   async function refreshUserStats() {
     if (!user) return;
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        credentials: 'include'
+        credentials: "include",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         userStats = data.stats;
       }
     } catch (err) {
-      console.error('Failed to refresh stats:', err);
+      console.error("Failed to refresh stats:", err);
     }
   }
 
   // Record game results
   async function recordGameResult(won: boolean, attempts: number) {
     if (!user) return;
-    
+
     try {
-      const endpoint = won ? '/game/win' : '/game/loss';
+      const endpoint = won ? "/game/win" : "/game/loss";
       await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
-        body: JSON.stringify({ attempts })
+        credentials: "include",
+        body: JSON.stringify({ attempts }),
       });
-      
+
       await refreshUserStats();
     } catch (err) {
-      console.error('Failed to record game result:', err);
+      console.error("Failed to record game result:", err);
     }
   }
 
   async function fetchInitialRandomGame() {
     try {
       const params = new URLSearchParams();
-      if (currentFilters.year)       params.set('year', String(currentFilters.year));
-      currentFilters.platforms.forEach(p => params.append('platforms', p));
-      currentFilters.genres.forEach(g    => params.append('genres', g));
-      if (currentFilters.topTier)    params.set('topTier', String(currentFilters.topTier));
- 
+      if (currentFilters.year) params.set("year", String(currentFilters.year));
+      currentFilters.platforms.forEach((p) => params.append("platforms", p));
+      currentFilters.genres.forEach((g) => params.append("genres", g));
+      if (currentFilters.topTier)
+        params.set("topTier", String(currentFilters.topTier));
+
       const url = `${API_BASE_URL}/games/random?${params.toString()}`;
       const response = await fetch(url);
 
@@ -149,24 +150,27 @@
     await fetchInitialRandomGame();
   }
 
-  // Improve year comparison function
+
   function compareYears(guess: GameGuess) {
     if (correctGame && correctGame.releaseYear && guess.releaseYear) {
       // Ensure that the year data exists and is valid
       const guessYearStr = String(guess.releaseYear).trim();
       const correctYearStr = String(correctGame.releaseYear).trim();
-      
+
       // Skip invalid years
-      if (guessYearStr === "Unknown" || correctYearStr === "Unknown" || 
-          guessYearStr === "" || correctYearStr === "") {
+      if (
+        guessYearStr === "Unknown" ||
+        correctYearStr === "Unknown" ||
+        guessYearStr === "" ||
+        correctYearStr === ""
+      ) {
         guess.arrow = "";
         return;
       }
-      
+
       const guessYear = parseInt(guessYearStr);
       const answerYear = parseInt(correctYearStr);
-      
-      // Ensure that the analysis is successful
+
       if (!isNaN(guessYear) && !isNaN(answerYear)) {
         if (guessYear < answerYear) {
           guess.arrow = "up";
@@ -175,12 +179,16 @@
         } else {
           guess.arrow = "equal";
         }
-        
+
         // Debug Information
-        console.log(`Year comparison: ${guessYear} vs ${answerYear} -> ${guess.arrow}`);
+        console.log(
+          `Year comparison: ${guessYear} vs ${answerYear} -> ${guess.arrow}`,
+        );
       } else {
         guess.arrow = "";
-        console.log(`Failed to parse years: "${guessYearStr}" vs "${correctYearStr}"`);
+        console.log(
+          `Failed to parse years: "${guessYearStr}" vs "${correctYearStr}"`,
+        );
       }
     } else {
       guess.arrow = "";
@@ -188,46 +196,81 @@
     }
   }
 
-  function compareArrays(guessArray: string[], correctArray: string[]): string {
-    const hasMatch = guessArray.some((item) =>
-      correctArray.some(
+  function compareArrays(
+    guessArray: string[],
+    correctArray: string[],
+  ): string[] {
+    return guessArray.map((item) => {
+      const hasMatch = correctArray.some(
         (correctItem) =>
           item.toLowerCase().trim() === correctItem.toLowerCase().trim(),
-      ),
-    );
-    return hasMatch ? "green" : "red";
+      );
+      return hasMatch ? "green" : "red";
+    });
   }
 
   function compareGenres(guess: GameGuess) {
     if (correctGame && correctGame.genres && guess.genres) {
-      guess.genreStatus = compareArrays(guess.genres, correctGame.genres);
+      guess.genreStatuses = compareArrays(guess.genres, correctGame.genres);
+      guess.genreStatus = guess.genreStatuses.some(
+        (status) => status === "green",
+      )
+        ? "green"
+        : "red";
+    } else if (guess.genres) {
+      guess.genreStatuses = guess.genres.map(() => "default");
+      guess.genreStatus = "default";
     }
   }
 
   function compareDevelopers(guess: GameGuess) {
     if (correctGame && correctGame.developers && guess.developers) {
-      guess.developerStatus = compareArrays(
+      guess.developerStatuses = compareArrays(
         guess.developers,
         correctGame.developers,
       );
+      guess.developerStatus = guess.developerStatuses.some(
+        (status) => status === "green",
+      )
+        ? "green"
+        : "red";
+    } else if (guess.developers) {
+      guess.developerStatuses = guess.developers.map(() => "default");
+      guess.developerStatus = "default";
     }
   }
 
   function comparePublishers(guess: GameGuess) {
     if (correctGame && correctGame.publishers && guess.publishers) {
-      guess.publisherStatus = compareArrays(
+      guess.publisherStatuses = compareArrays(
         guess.publishers,
         correctGame.publishers,
       );
+      guess.publisherStatus = guess.publisherStatuses.some(
+        (status) => status === "green",
+      )
+        ? "green"
+        : "red";
+    } else if (guess.publishers) {
+      guess.publisherStatuses = guess.publishers.map(() => "default");
+      guess.publisherStatus = "default";
     }
   }
 
   function comparePlatforms(guess: GameGuess) {
     if (correctGame && correctGame.platforms && guess.platforms) {
-      guess.platformStatus = compareArrays(
+      guess.platformStatuses = compareArrays(
         guess.platforms,
         correctGame.platforms,
       );
+      guess.platformStatus = guess.platformStatuses.some(
+        (status) => status === "green",
+      )
+        ? "green"
+        : "red";
+    } else if (guess.platforms) {
+      guess.platformStatuses = guess.platforms.map(() => "default");
+      guess.platformStatus = "default";
     }
   }
 
@@ -251,7 +294,7 @@ Publishers: ${correctGame.publishers.join(", ")}
 Platforms: ${correctGame.platforms.join(", ")}
     `;
     alert(answerMessage);
-    
+
     // Recording failure results
     if (user) {
       await recordGameResult(false, 10 - remainingAttempts);
@@ -295,7 +338,11 @@ Platforms: ${correctGame.platforms.join(", ")}
 {:else}
   <main>
     <div class="nav-position">
-      <NavigationBar {user} on:showProfile={showProfile} on:showLogin={() => showLoginModal = true} />
+      <NavigationBar
+        {user}
+        on:showProfile={showProfile}
+        on:showLogin={() => (showLoginModal = true)}
+      />
     </div>
     <div class="content">
       <SearchBar
@@ -303,29 +350,32 @@ Platforms: ${correctGame.platforms.join(", ")}
           // Debug Information
           console.log("Game guessed:", e.detail);
           console.log("Correct game:", correctGame);
-          
+
           compareAllProperties(e.detail);
           guesses = [...guesses, e.detail];
           remainingAttempts = remainingAttempts - 1;
-          
+
           if (remainingAttempts == 0) {
             await LostEvent();
             return;
           }
-          
+
           if (correctGame) {
             const correctAnswer = `Correct Answer: ${correctGame.gameName}`;
             console.log(correctAnswer);
           }
-          
-          if (e.detail.gameName.toLowerCase() === correctGame.gameName.toLowerCase()) {
+
+          if (
+            e.detail.gameName.toLowerCase() ===
+            correctGame.gameName.toLowerCase()
+          ) {
             alert("Congratulations! You guessed the game correctly!");
-            
+
             //Record victory results
             if (user) {
               await recordGameResult(true, 10 - remainingAttempts);
             }
-            
+
             remainingAttempts = 10;
             guesses = [];
             correctGame = null;
@@ -344,18 +394,18 @@ Platforms: ${correctGame.platforms.join(", ")}
 {/if}
 
 <!--Modal box-->
-<LoginModal 
-  bind:isVisible={showLoginModal} 
+<LoginModal
+  bind:isVisible={showLoginModal}
   on:loginSuccess={handleLoginSuccess}
-  on:close={() => showLoginModal = false}
+  on:close={() => (showLoginModal = false)}
 />
 
-<ProfileModal 
+<ProfileModal
   bind:isVisible={showProfileModal}
   {user}
   stats={userStats}
   on:logout={handleLogout}
-  on:close={() => showProfileModal = false}
+  on:close={() => (showProfileModal = false)}
 />
 
 <style>
@@ -401,8 +451,12 @@ Platforms: ${correctGame.platforms.join(", ")}
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   .loading-screen p {

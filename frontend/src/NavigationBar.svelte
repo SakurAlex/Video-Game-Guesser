@@ -5,11 +5,13 @@
   import homeIcon from "./assets/home.svg";
   import helpIcon from "./assets/question.svg";
   import githubIcon from "./assets/github.svg";
+  import Settings from './Settings.svelte';
 
   // User Status
   export let user = null;
 
   let showHelptutorials = false;
+  let showSettings = false;
 
   const dispatch = createEventDispatcher();
 
@@ -46,8 +48,11 @@
   <div class="navigation-buttons">
     
     <button class="navigation-button"
-      ><img src={settingsIcon} alt="settings" /></button
+      on:click={() => showSettings = true}
     >
+      <img src={settingsIcon} alt="settings" />
+    </button>
+
     <button class="navigation-button">
       <a href="localhost:3000"><img src={homeIcon} alt="home" /></a>
     </button>
@@ -80,6 +85,10 @@
     {/if}
   </div>
 </nav>
+
+{#if showSettings}
+  <Settings on:close={() => showSettings = false} />
+{/if}
 
 <!-- Help tutorials -->
 {#if showHelptutorials}

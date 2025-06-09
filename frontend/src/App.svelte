@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
   import NavigationBar from "./NavigationBar.svelte";
   import SearchBar from "./SearchBar.svelte";
   import GameStatus from "./GameStatus.svelte";
   import GameTable from "./GameTable.svelte";
   import LoginModal from "./LoginModal.svelte";
   import ProfileModal from "./ProfileModal.svelte";
+  import { filters } from './stores/filterStore.js';
   import type { GameGuess } from "./types";
 
   // User state management
@@ -22,6 +24,16 @@
   let correctGame: GameGuess | null = null;
 
   const API_BASE_URL = "http://localhost:8000/api";
+
+  let currentFilters: {
+    year: number|null,
+    platforms: string[],
+    genres: string[],
+    topTier: number|null
+  } = { year: null, platforms: [], genres: [], topTier: null };
+ 
+  const unsubFilters = filters.subscribe(f => currentFilters = f);
+  onDestroy(unsubFilters);
 
   // Check user login status
   async function checkAuthStatus() {
@@ -83,7 +95,15 @@
 
   async function fetchInitialRandomGame() {
     try {
-      const response = await fetch(`${API_BASE_URL}/games/random`);
+      const params = new URLSearchParams();
+      if (currentFilters.year)       params.set('year', String(currentFilters.year));
+      currentFilters.platforms.forEach(p => params.append('platforms', p));
+      currentFilters.genres.forEach(g    => params.append('genres', g));
+      if (currentFilters.topTier)    params.set('topTier', String(currentFilters.topTier));
+ 
+      const url = `${API_BASE_URL}/games/random?${params.toString()}`;
+      const response = await fetch(url);
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

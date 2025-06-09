@@ -1,6 +1,13 @@
 <script lang="ts">
   import searchIcon from "./assets/search.svg";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy } from "svelte";
+  import { filters } from './stores/filterStore.js';
+
+  // for filter-driven re-fetch
+  let games = [];
+  let currentFilters = {};
+  const unsub = filters.subscribe(f => (currentFilters = f));
+  onDestroy(unsub);
 
   let searchQuery = "";
   let suggestions: any[] = [];
@@ -16,6 +23,21 @@
   const dispatch = createEventDispatcher();
 
   $: hasContent = searchQuery.trim().length > 0;
+
+  const unsubscribe = filters.subscribe(async f => {
+    currentFilters = f;
+    const params = new URLSearchParams({ q: searchQuery, limit: '10' });
+
+    if (f.year)         params.set('year', f.year);
+    f.platforms.forEach(p => params.append('platforms', p));
+    f.genres.forEach(g    => params.append('genres', g));
+    if (f.topTier)      params.set('topTier', f.topTier);
+
+  const res = await fetch(`/api/games?${params.toString()}`);
+    games = await res.json();
+  });
+
+  onDestroy(unsubscribe);
 
   function handleSearch(query: string) {
     if (searchTimeout) {
@@ -36,13 +58,24 @@
     isLoading = true;
     error = null;
     try {
+      const params = new URLSearchParams({
+      q: encodeURIComponent(query),
+      limit: '10'
+      });
+      if (currentFilters.year)       params.set('year', currentFilters.year);
+      currentFilters.platforms.forEach(p => params.append('platforms', p));
+      currentFilters.genres.forEach(g    => params.append('genres', g));
+      if (currentFilters.topTier)    params.set('topTier', currentFilters.topTier);
+ 
       const response = await fetch(
-        `${API_BASE_URL}/games/search?q=${encodeURIComponent(query)}&limit=10`,
+        `${API_BASE_URL}/games?${params.toString()}`
       );
+
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
-      suggestions = data.results || [];
+      suggestions = data || [];
+
       showSuggestions = suggestions.length > 0;
       selectedIndex = -1;
     } catch (err: any) {

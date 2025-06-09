@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, send_from_directory, request, session
+from datetime import datetime 
 import os
 import requests
 import time
@@ -21,6 +22,71 @@ IGDB_BASE_URL = "https://api.igdb.com/v4"
 app = Flask(__name__, static_folder=static_path, template_folder=template_path)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-change-this')
 CORS(app, supports_credentials=True)
+
+#Helper mappings from names to IGDB IDs
+PLATFORM_NAME_TO_ID = {
+    'PC': 6,
+    'Mac': 2,
+    'Linux': 3,
+    'iOS': 39,
+    'Android': 34,
+    'PlayStation 1': 7,
+    'PlayStation 2': 8,
+    'PlayStation 3': 9,
+    'PlayStation Portable (PSP)': 36,
+    'PlayStation Vita': 167,
+    'PlayStation 4': 48,
+    'PlayStation 5': 187,
+    'Xbox': 11,
+    'Xbox 360': 12,
+    'Xbox One': 49,
+    'Xbox Series X': 169,
+    'Nintendo Entertainment System (NES)': 18,
+    'Super Nintendo (SNES)': 19,
+    'Nintendo 64': 4,
+    'GameCube': 21,
+    'Wii': 5,
+    'Wii U': 41,
+    'Nintendo Switch': 130,
+    'Game Boy': 33,
+    'Game Boy Color': 43,
+    'Game Boy Advance': 24,
+    'Nintendo DS': 20,
+    'Nintendo 3DS': 37,
+    'Arcade': 28,
+    'Dreamcast': 13
+}
+
+GENRE_NAME_TO_ID = {
+    'Action': 4,
+    'Adventure': 31,
+    'Role-playing (RPG)': 12,
+    'Shooter': 5,
+    'Platform': 8,
+    'Puzzle': 9,
+    'Racing': 10,
+    'Sports': 14,
+    'Strategy': 15,
+    'Simulation': 13,
+    'Fighting': 6,
+    'Stealth': 20,
+    'Survival': 23,
+    'Sandbox': 24,
+    'Pinball': 34,
+    'Educational': 38,
+    'Indie': 32,
+    'Arcade': 33,
+    'Family': 25,
+    'Music': 18
+}
+
+def map_platform_names_to_ids(names):
+    """Turn platform names into IGDB platform IDs."""
+    return [PLATFORM_NAME_TO_ID[n] for n in names if n in PLATFORM_NAME_TO_ID]
+
+def map_genre_names_to_ids(names):
+    """Turn genre names into IGDB genre IDs."""
+    return [GENRE_NAME_TO_ID[n] for n in names if n in GENRE_NAME_TO_ID]
 
 # Database setup
 def init_db():
@@ -500,27 +566,87 @@ def game_details(game_id):
         print(f"Game details error: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
+
+#New filtered list endpoint
+@app.route('/api/games', methods=['GET'])
+def get_games():
+    """Fetch games with optional year / platform / genre / top-N filters"""
+    year      = request.args.get('year', type=int)
+    platforms = request.args.getlist('platforms')
+    genres    = request.args.getlist('genres')
+    top_tier  = request.args.get('topTier', type=int)
+
+    # Build IGDB where clauses
+    where_clauses = []
+    if year:
+        start = int(datetime(year, 1, 1).timestamp())
+        end   = int(datetime(year,12,31,23,59,59).timestamp())
+        where_clauses.append(
+            f"first_release_date >= {start} & first_release_date <= {end}"
+        )
+
+    if platforms:
+        ids = map_platform_names_to_ids(platforms)
+        where_clauses.append(f"platforms = ({','.join(map(str, ids))})")
+
+    if genres:
+        ids = map_genre_names_to_ids(genres)
+        where_clauses.append(f"genres = ({','.join(map(str, ids))})")
+
+    # Assemble the IGDB query
+    query  = "fields name, first_release_date, genres.name, platforms.name, total_rating_count;"
+    if where_clauses:
+        query += " where " + " & ".join(where_clauses) + ";"
+    query += " sort total_rating_count desc;"
+    if top_tier:
+        query += f" limit {top_tier};"
+
+    # Execute and return
+    games = igdb_request('games', query)
+    return jsonify(games)
+
+
 @app.route('/api/games/random', methods=['GET'])
 def get_random_game():
+    """Pick a random game within the current filters."""
     try:
-        query = '''
-        fields name, first_release_date, genres.name, involved_companies.company.name, 
-        involved_companies.developer, involved_companies.publisher, platforms.name, cover.url;
-        where category = 0;
-        limit 200;
-        sort popularity desc;
-        '''
-        games = igdb_request('games', query)
-        if not games:
-            return jsonify({'error': 'No games found'}), 404
-        
-        game = random.choice(games)
-        detailed_game = get_game_info(game['id'])
-        if not detailed_game:
-            return jsonify({'error': 'Could not fetch game details'}), 500
+        # 1) Read filters
+        year      = request.args.get('year', type=int)
+        platforms = request.args.getlist('platforms')
+        genres    = request.args.getlist('genres')
+        top_tier  = request.args.get('topTier', type=int)
 
-        return jsonify(detailed_game)
-        
+        # 2) Build WHERE clauses
+        where_clauses = []
+        if year:
+            start = int(datetime(year,1,1).timestamp())
+            end   = int(datetime(year,12,31,23,59,59).timestamp())
+            where_clauses.append(
+                f"first_release_date >= {start} & first_release_date <= {end}"
+            )
+        if platforms:
+            ids = map_platform_names_to_ids(platforms)
+            where_clauses.append(f"platforms = ({','.join(map(str,ids))})")
+        if genres:
+            ids = map_genre_names_to_ids(genres)
+            where_clauses.append(f"genres = ({','.join(map(str,ids))})")
+
+        # 3) Fetch filtered set (no hard limit here)
+        query  = "fields id, name;"
+        if where_clauses:
+            query += " where " + " & ".join(where_clauses) + ";"
+        query += " sort total_rating_count desc;"
+        filtered = igdb_request('games', query) or []
+        if not filtered:
+            return jsonify({'error': 'No games match those filters'}), 404
+
+        # 4) Pick randomly and return full details
+        choice   = random.choice(filtered)
+        detailed = get_game_info(choice['id'])
+        if not detailed:
+            return jsonify({'error': 'Could not fetch game details'}), 500
+        return jsonify(detailed)
+
     except Exception as e:
         print(f"Random game error: {e}")
         return jsonify({'error': 'Internal server error'}), 500

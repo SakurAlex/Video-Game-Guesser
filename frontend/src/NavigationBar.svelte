@@ -61,11 +61,6 @@
       <div class="user-section">
         
         <button class="user-button" on:click={handleProfileClick}>
-          <!--
-          <div class="user-avatar">
-            {user.username.charAt(0).toUpperCase()}
-          </div>
-          -->
           <span class="username">{user.username}</span>
         </button>
       </div>
@@ -142,7 +137,7 @@
   }
 
   .navigation-button img:hover {
-    opacity: 0.8;
+    opacity: 0.6;
   }
 
   .navigation-button img {
@@ -160,8 +155,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #f8f9fa;
-    border: 2px solid #e1e5e9;
+    background: #000000;
+    color: #ffffff;
+    border: none;
     border-radius: 23px;
     padding: 4px 12px 4px 12px;
     cursor: pointer;
@@ -170,32 +166,15 @@
   }
 
   .user-button:hover {
-    background: #b9dbf3;
-    border-color: #a5d0e8;
-  }
-
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #b9dbf3, #a5d0e8);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: bold;
-    color: #2c3e50;
+    opacity: 0.6;
   }
 
   .username {
     font-family: Inter;
     font-size: 14px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #ffffff;
     max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .login-nav-button {

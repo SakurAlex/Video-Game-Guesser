@@ -160,7 +160,7 @@
       // Check if settings actually changed compared to original state
       const hasChanged = JSON.stringify(originalFilters) !== JSON.stringify(local);
       
-      console.log('🔍 Filter change detection:');
+      console.log('Filter change detection:');
       console.log('Original filters:', originalFilters);
       console.log('New local filters:', local);  
       console.log('Has changed:', hasChanged);
@@ -275,7 +275,6 @@
                   indeterminate={isPlatformCategoryPartiallySelected(key)}
                   on:change={() => togglePlatformCategory(key)}
                 />
-                <span class="checkmark {isPlatformCategoryPartiallySelected(key) ? 'partial' : ''}"></span>
                 {category.name}
               </label>
               <div class="platform-list">
@@ -286,7 +285,6 @@
                       checked={local.platforms.includes(platform)}
                       on:change={() => toggleArray(local.platforms, platform)}
                     />
-                    <span class="checkmark"></span>
                     {platform}
         </label>
       {/each}
@@ -316,7 +314,6 @@
           <input type="checkbox"
                  checked={local.genres.includes(g)}
                  on:change={() => toggleArray(local.genres, g)} />
-              <span class="checkmark"></span>
           {g}
         </label>
       {/each}
@@ -423,11 +420,6 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: background-color 0.2s ease;
-  }
-
-  .close-button:hover {
-    background-color: #f5f5f5;
   }
 
   .settings-body {
@@ -448,11 +440,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
   }
 
   .filter-section h3 {
-    margin: 0;
+    margin: 0 0 12px 0;
     font-size: 18px;
     font-weight: 600;
     color: #2c3e50;
@@ -476,27 +467,14 @@
     width: 100%;
     max-width: 150px;
     padding: 8px 12px;
-    border: 2px solid #e1e5e9;
+    border: 1px solid #e1e5e9;
     border-radius: 8px;
     font-size: 14px;
     color: #2c3e50;
-    transition: border-color 0.2s ease;
-  }
-
-  /* Remove number input spinners */
-  .year-input::-webkit-outer-spin-button,
-  .year-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .year-input[type=number] {
-    -moz-appearance: textfield;
   }
 
   .year-input:focus {
     outline: none;
-    border-color: #b9dbf3;
   }
 
   .year-separator {
@@ -530,36 +508,17 @@
   }
 
   .checkbox-label:hover {
-    background-color: #f0f7ff;
+    background-color: #f5f5f5;
   }
 
-  .checkbox-label input[type="checkbox"] {
-    display: none;
-  }
-
-  .checkmark {
+  input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    border: 2px solid #b9dbf3;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
+    margin: 0;
+    cursor: pointer;
   }
 
-  .checkbox-label input[type="checkbox"]:checked + .checkmark {
-    background-color: #b9dbf3;
-    border-color: #a5d0e8;
-  }
 
-  .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
-    content: "✓";
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-  }
 
   .radio-group {
     display: flex;
@@ -573,7 +532,7 @@
     gap: 8px;
     cursor: pointer;
     padding: 8px 12px;
-    border: 2px solid #e1e5e9;
+    border: 1px solid #e1e5e9;
     border-radius: 20px;
     transition: all 0.2s ease;
     font-size: 14px;
@@ -592,7 +551,7 @@
   .radio-mark {
     width: 16px;
     height: 16px;
-    border: 2px solid #b9dbf3;
+    border: 1px solid #b9dbf3;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -615,7 +574,7 @@
 
   .radio-label input[type="radio"]:checked {
     background-color: #f0f7ff;
-    border-color: #b9dbf3;
+    border: none;
   }
 
   .message-bar {
@@ -670,14 +629,13 @@
   }
 
   .apply-button {
-    background: #28a745;
+    background: #6ec374;
     color: white;
-    border: 2px solid #28a745;
+    border: none;
   }
-
-  .apply-button:hover:not(:disabled) {
-    background: #218838;
-    border-color: #1e7e34;
+  
+  .apply-button:hover {
+    opacity: 0.6;
   }
 
   .apply-button:disabled {
@@ -688,14 +646,13 @@
   }
 
   .close-button-footer {
-    background: #f8f9fa;
+    background: #eceded;
     color: #67666e;
-    border: 2px solid #e1e5e9;
+    border: none;
   }
 
   .close-button-footer:hover {
-    background: #e9ecef;
-    border-color: #d3d3d3;
+    opacity: 0.6;
   }
 
   .platform-categories {
@@ -736,15 +693,7 @@
     font-size: 13px;
   }
 
-  .checkmark.partial::after {
-    content: "";
-    position: absolute;
-    left: 4px;
-    top: 7px;
-    width: 8px;
-    height: 2px;
-    background-color: white;
-  }
+
 
   .toggle-action {
     display: flex;
@@ -752,10 +701,11 @@
   }
 
   .toggle-btn {
-    padding: 6px 16px;
+    padding: 4px 10px;
+    margin-bottom: 3px;
     font-size: 13px;
     font-weight: 500;
-    border: 2px solid #b9dbf3;
+    border: 1px solid #b9dbf3;
     background: white;
     color: #2c3e50;
     border-radius: 20px;
@@ -763,132 +713,28 @@
     transition: all 0.2s ease;
   }
 
-  .toggle-btn:hover {
-    background: #f0f7ff;
-  }
-
   .toggle-btn.selected {
     background: #b9dbf3;
     color: white;
-  }
-
-  .toggle-btn:active {
-    transform: scale(0.95);
   }
 
   .attempts-container {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-top: 8px;
   }
 
   .attempts-input {
     width: 100px;
     padding: 8px 12px;
-    border: 2px solid #e1e5e9;
+    border: 1px solid #e1e5e9;
     border-radius: 8px;
     font-size: 14px;
     color: #2c3e50;
-    transition: border-color 0.2s ease;
-  }
-
-  .attempts-input::-webkit-outer-spin-button,
-  .attempts-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  .attempts-input[type=number] {
-    -moz-appearance: textfield;
   }
 
   .attempts-input:focus {
     outline: none;
-    border-color: #b9dbf3;
   }
 
-  .attempts-description {
-    font-size: 14px;
-    color: #666;
-  }
-
-  @media (max-width: 768px) {
-    .settings-content {
-      width: 95%;
-      max-height: 85vh;
-    }
-
-    .settings-header,
-    .settings-body,
-    .settings-footer {
-      padding: 16px;
-    }
-
-    .settings-header h2 {
-      font-size: 20px;
-    }
-
-    .filter-section h3 {
-      font-size: 16px;
-    }
-
-    .checkbox-grid {
-      grid-template-columns: 1fr;
-      max-height: 150px;
-    }
-
-    .radio-group {
-      flex-direction: column;
-    }
-
-    .settings-footer {
-      flex-direction: column;
-    }
-
-    .apply-button, .close-button-footer {
-      width: 100%;
-    }
-
-    .section-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .year-range-container {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .year-input {
-      max-width: none;
-    }
-
-    .platform-list {
-      grid-template-columns: 1fr;
-      padding-left: 12px;
-    }
-
-    .platform-categories {
-      max-height: 300px;
-    }
-
-    .toggle-action {
-      margin-top: 8px;
-    }
-
-    .toggle-btn {
-      width: 100%;
-    }
-
-    .attempts-container {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .attempts-input {
-      width: 100%;
-    }
-  }
 </style>

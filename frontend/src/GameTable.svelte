@@ -159,8 +159,8 @@
     color: #62AC7E;
   }
   .tag.red {
-    background-color: #ED8181;
-    color: #BF3939;
+    background-color: #FFA1A1;
+    color: #BB2525;
     border: none;
   }
   .tag.default {

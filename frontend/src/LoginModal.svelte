@@ -307,7 +307,7 @@
   .form-group input {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e1e5e9;
+    border: 1px solid #e1e5e9;
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.2s ease;

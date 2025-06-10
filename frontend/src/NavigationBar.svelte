@@ -216,53 +216,22 @@
     background: #a5d0e8;
   }
 
-
-
-  @media (max-width: 640px) {
-    .navigation-bar-container {
-      padding: 10px;
+  /* responsive design */
+  @media (max-width: 767px) {
+    .difficulty-section {
+      display: none;
     }
 
     .navigation-bar {
-      width: 100%;
-      border-radius: 0;
-      padding: 6px 12px;
-      justify-content: space-between;
+      padding: 0px 8px;
+      gap: 8px;
     }
 
-    .difficulty-text {
-      font-size: 12px;
+    .navigation-buttons {
+      gap: 8px;
     }
-
-    .navigation-button {
-      width: 32px;
-      height: 32px;
-    }
-
-    .user-button {
-      height: 36px;
-      padding: 2px 8px 2px 2px;
-    }
-
-    .user-avatar {
-      width: 30px;
-      height: 30px;
-      font-size: 14px;
-    }
-
-    .username {
-      font-size: 12px;
-      max-width: 60px;
-    }
-
-    .login-nav-button {
-      height: 36px;
-      padding: 0 12px;
-      font-size: 12px;
-    }
-
-
   }
+
 
   @keyframes pulse {
     0%,

@@ -168,4 +168,86 @@
     color: #353535;
     border: none;
   }
+
+  /* responsive design */
+  @media (max-width: 767px) {
+    .table-container {
+      margin: 10px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+
+    table {
+      font-size: 14px;
+    }
+
+    th {
+      padding: 8px 12px;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .empty-message {
+      font-size: 16px;
+      padding: 20px 10px;
+    }
+
+    .cover-image img {
+      width: 60px;
+      height: 48px;
+    }
+
+    .tag {
+      padding: 3px 6px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .tags-container {
+      gap: 2px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .table-container {
+      margin: 5px;
+      box-shadow: -2px 2px 2px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    th {
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 6px;
+      font-size: 12px;
+    }
+
+    .empty-message {
+      font-size: 14px;
+      padding: 15px 8px;
+    }
+
+    .cover-image img {
+      width: 40px;
+      height: 32px;
+      border-radius: 6px;
+    }
+
+    .tag {
+      padding: 2px 4px;
+      font-size: 10px;
+      border-radius: 10px;
+    }
+
+    .tags-container {
+      gap: 1px;
+    }
+  }
 </style>

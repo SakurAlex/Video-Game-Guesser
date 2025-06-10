@@ -443,5 +443,115 @@
     .game-info strong {
       color: #333;
     }
+
+    /* responsive design */
+    @media (max-width: 767px) {
+      .input-wrapper {
+        width: 400px;
+      }
+
+      .search-input {
+        height: 42px;
+        font-size: 16px;
+        border-radius: 12px;
+      }
+
+      .search-button {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+      }
+
+      .search-button img {
+        width: 20px;
+        height: 20px;
+      }
+
+      .suggestions {
+        border-radius: 12px;
+        max-height: 300px;
+      }
+
+      .suggestion {
+        padding: 8px 12px;
+      }
+
+      .suggestion-icon {
+        width: 36px;
+        height: 36px;
+        margin-right: 8px;
+      }
+
+      .suggestion-name {
+        font-size: 14px;
+      }
+
+      .suggestion-year {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .search-container {
+        gap: 8px;
+      }
+
+      .input-wrapper {
+        width: calc(100vw - 80px);
+      }
+
+      .search-input {
+        height: 38px;
+        font-size: 14px;
+        border-radius: 10px;
+        padding: 0 12px;
+      }
+
+      .search-button {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+      }
+
+      .search-button img {
+        width: 18px;
+        height: 18px;
+      }
+
+      .suggestions {
+        border-radius: 10px;
+        max-height: 250px;
+      }
+
+      .suggestion {
+        padding: 6px 8px;
+      }
+
+      .suggestion-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 6px;
+        border-radius: 6px;
+      }
+
+      .suggestion-name {
+        font-size: 13px;
+      }
+
+      .suggestion-year {
+        font-size: 11px;
+      }
+
+      .loading, .no-results, .error {
+        padding: 12px;
+        font-size: 13px;
+      }
+
+      .loading-spinner {
+        width: 16px;
+        height: 16px;
+        margin-right: 6px;
+      }
+    }
   </style>
 {/if}

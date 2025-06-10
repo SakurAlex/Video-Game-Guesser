@@ -570,26 +570,33 @@ def game_details(game_id):
 #New filtered list endpoint
 @app.route('/api/games', methods=['GET'])
 def get_games():
-    """Fetch games with optional year / platform / genre / top-N filters"""
-    year      = request.args.get('year', type=int)
-    platforms = request.args.getlist('platforms')
-    genres    = request.args.getlist('genres')
-    top_tier  = request.args.get('topTier', type=int)
+    """Fetch games with optional year range / platform / genre / top-N filters"""
+    year_start = request.args.get('yearStart', type=int)
+    year_end   = request.args.get('yearEnd', type=int)
+    platforms  = request.args.getlist('platforms')
+    genres     = request.args.getlist('genres')
+    top_tier   = request.args.get('topTier', type=int)
 
     # Build IGDB where clauses
     where_clauses = []
-    if year:
-        start = int(datetime(year, 1, 1).timestamp())
-        end   = int(datetime(year,12,31,23,59,59).timestamp())
+    if year_start or year_end:
+        # Use provided range or set reasonable defaults
+        start_year = year_start if year_start else 1970
+        end_year = year_end if year_end else datetime.now().year
+        
+        start_timestamp = int(datetime(start_year, 1, 1).timestamp())
+        end_timestamp = int(datetime(end_year, 12, 31, 23, 59, 59).timestamp())
         where_clauses.append(
-            f"first_release_date >= {start} & first_release_date <= {end}"
+            f"first_release_date >= {start_timestamp} & first_release_date <= {end_timestamp}"
         )
 
-    if platforms:
+    # Only add platform filter if not all platforms are selected
+    if platforms and len(platforms) < len(PLATFORM_NAME_TO_ID):
         ids = map_platform_names_to_ids(platforms)
         where_clauses.append(f"platforms = ({','.join(map(str, ids))})")
 
-    if genres:
+    # Only add genre filter if not all genres are selected
+    if genres and len(genres) < len(GENRE_NAME_TO_ID):
         ids = map_genre_names_to_ids(genres)
         where_clauses.append(f"genres = ({','.join(map(str, ids))})")
 
@@ -611,23 +618,38 @@ def get_random_game():
     """Pick a random game within the current filters."""
     try:
         # 1) Read filters
-        year      = request.args.get('year', type=int)
-        platforms = request.args.getlist('platforms')
-        genres    = request.args.getlist('genres')
-        top_tier  = request.args.get('topTier', type=int)
+        year_start = request.args.get('yearStart', type=int)
+        year_end   = request.args.get('yearEnd', type=int)
+        platforms  = request.args.getlist('platforms')
+        genres     = request.args.getlist('genres')
+        top_tier   = request.args.get('topTier', type=int)
+        
+        # Debug information: record API call
+        print("🔔 /api/games/random endpoint called!")
+        print(f"📝 Request filters - Year Range: {year_start} to {year_end}, Platforms: {len(platforms)}, Genres: {len(genres)}, TopTier: {top_tier}")
+        print(f"📊 Total available - Platforms: {len(PLATFORM_NAME_TO_ID)}, Genres: {len(GENRE_NAME_TO_ID)}")
+        print(f"🔍 Will filter? - Year Range: {year_start or year_end}, Platforms: {platforms and len(platforms) < len(PLATFORM_NAME_TO_ID)}, Genres: {genres and len(genres) < len(GENRE_NAME_TO_ID)}")
 
         # 2) Build WHERE clauses
         where_clauses = []
-        if year:
-            start = int(datetime(year,1,1).timestamp())
-            end   = int(datetime(year,12,31,23,59,59).timestamp())
+        if year_start or year_end:
+            # Use provided range or set reasonable defaults
+            start_year = year_start if year_start else 1970
+            end_year = year_end if year_end else datetime.now().year
+            
+            start_timestamp = int(datetime(start_year, 1, 1).timestamp())
+            end_timestamp = int(datetime(end_year, 12, 31, 23, 59, 59).timestamp())
             where_clauses.append(
-                f"first_release_date >= {start} & first_release_date <= {end}"
+                f"first_release_date >= {start_timestamp} & first_release_date <= {end_timestamp}"
             )
-        if platforms:
+        
+        # Only add platform filter if not all platforms are selected
+        if platforms and len(platforms) < len(PLATFORM_NAME_TO_ID):
             ids = map_platform_names_to_ids(platforms)
             where_clauses.append(f"platforms = ({','.join(map(str,ids))})")
-        if genres:
+        
+        # Only add genre filter if not all genres are selected  
+        if genres and len(genres) < len(GENRE_NAME_TO_ID):
             ids = map_genre_names_to_ids(genres)
             where_clauses.append(f"genres = ({','.join(map(str,ids))})")
 
@@ -656,6 +678,7 @@ def get_random_game():
         detailed = get_game_info(choice['id'])
         if not detailed:
             return jsonify({'error': 'Could not fetch game details'}), 500
+        
         return jsonify(detailed)
 
     except Exception as e:

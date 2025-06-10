@@ -26,13 +26,24 @@
   const API_BASE_URL = "http://localhost:8000/api";
 
   let currentFilters: {
-    year: number | null;
+    yearStart: number | null;
+    yearEnd: number | null;
     platforms: string[];
     genres: string[];
     topTier: number | null;
-  } = { year: null, platforms: [], genres: [], topTier: null };
+  } = { yearStart: null, yearEnd: null, platforms: [], genres: [], topTier: null };
 
-  const unsubFilters = filters.subscribe((f) => (currentFilters = f));
+  const unsubFilters = filters.subscribe((f) => {
+    const filtersChanged = JSON.stringify(currentFilters) !== JSON.stringify(f);
+    currentFilters = f;
+    
+    // if filters changed and not loading, fetch a new random game
+    if (filtersChanged && !loading) {
+      console.log("🔧 Filters changed, fetching new random game...");
+      console.log("New filters:", f);
+      fetchInitialRandomGame();
+    }
+  });
   onDestroy(unsubFilters);
 
   // Check user login status
@@ -95,14 +106,19 @@
 
   async function fetchInitialRandomGame() {
     try {
+      console.log("fetchInitialRandomGame called!");
+      console.log("Current filters:", currentFilters);
+      
       const params = new URLSearchParams();
-      if (currentFilters.year) params.set("year", String(currentFilters.year));
+      if (currentFilters.yearStart) params.set("yearStart", String(currentFilters.yearStart));
+      if (currentFilters.yearEnd) params.set("yearEnd", String(currentFilters.yearEnd));
       currentFilters.platforms.forEach((p) => params.append("platforms", p));
       currentFilters.genres.forEach((g) => params.append("genres", g));
       if (currentFilters.topTier)
         params.set("topTier", String(currentFilters.topTier));
 
       const url = `${API_BASE_URL}/games/random?${params.toString()}`;
+      console.log("🌐 Fetching from URL:", url);
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -123,6 +139,26 @@
         publisherStatus: "",
         platformStatus: "",
       };
+
+      // Debug information: print all game information
+      console.log("=" .repeat(60));
+      console.log("🎮 NEW RANDOM GAME SELECTED (Settings Changed)");
+      console.log("=" .repeat(60));
+      console.log(`Game ID: ${randomGameDetails.id}`);
+      console.log(`Game Name: ${randomGameDetails.name}`);
+      console.log(`Release Year: ${randomGameDetails.release_year || 'Unknown'}`);
+      console.log(`Genres: ${randomGameDetails.genres?.length ? randomGameDetails.genres.join(', ') : 'None'}`);
+      console.log(`Developers: ${randomGameDetails.developers?.length ? randomGameDetails.developers.join(', ') : 'None'}`);
+      console.log(`Publishers: ${randomGameDetails.publishers?.length ? randomGameDetails.publishers.join(', ') : 'None'}`);
+      console.log(`Platforms: ${randomGameDetails.platforms?.length ? randomGameDetails.platforms.join(', ') : 'None'}`);
+      console.log(`Cover URL: ${randomGameDetails.cover_url || 'None'}`);
+      console.log("-" .repeat(60));
+      console.log(`Applied Filters:`);
+      console.log(`  - Year Range: ${currentFilters.yearStart || 'None'} to ${currentFilters.yearEnd || 'None'}`);
+      console.log(`  - Platforms: ${currentFilters.platforms.length > 0 ? `${currentFilters.platforms.length} selected` : 'All'}`);
+      console.log(`  - Genres: ${currentFilters.genres.length > 0 ? `${currentFilters.genres.length} selected` : 'All'}`);
+      console.log(`  - Top Tier: ${currentFilters.topTier || 'Unlimited'}`);
+      console.log("=" .repeat(60));
     } catch (err: any) {
       error = `Failed to load random game: ${err.message}`;
       console.error("Error fetching random game:", err);

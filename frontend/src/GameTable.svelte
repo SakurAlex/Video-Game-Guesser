@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GameGuess } from "./types";
+  import gameCover from "./assets/default_game.svg";
   export let guesses: GameGuess[] = [];
 </script>
 
@@ -30,7 +31,7 @@
               {#if guess.cover_url}
                 <img src={guess.cover_url} alt="cover" class="cover-image" />
               {:else}
-                <span>🎮</span>
+                <img src={gameCover} alt="cover" class="cover-image" />
               {/if}
             </td>
             <td>{guess.gameName}</td>
@@ -131,7 +132,7 @@
     height: 80px;
     object-fit: cover;
     border-radius: 10px;
-    border: 1px solid #ddd;
+    background-color: #b5b5b5;
   }
   .cover-image {
     text-align: center;
@@ -154,17 +155,17 @@
     transition: all 0.2s ease;
   }
   .tag.green {
-    background-color: #50b973;
-    color: white;
+    background-color: #BFF4D1;
+    color: #62AC7E;
   }
   .tag.red {
-    background-color: #ec5c5c;
-    color: white;
+    background-color: #ED8181;
+    color: #BF3939;
     border: none;
   }
   .tag.default {
     background-color: #e0e0e0;
-    color: #333;
+    color: #353535;
     border: none;
   }
 </style>

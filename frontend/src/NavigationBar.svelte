@@ -25,6 +25,10 @@
   function handleLoginClick() {
     dispatch('showLogin');
   }
+
+  function handleHomeClick() {
+    window.location.reload();
+  }
 </script>
 
 <nav class="navigation-bar">
@@ -40,8 +44,8 @@
       <img src={settingsIcon} alt="settings" />
     </button>
 
-    <button class="navigation-button">
-      <a href="localhost:3000"><img src={homeIcon} alt="home" /></a>
+    <button class="navigation-button" on:click={handleHomeClick}>
+      <img src={homeIcon} alt="home" />
     </button>
     <button class="navigation-button" on:click={() => showHelptutorials = true}
       ><img src={helpIcon} alt="help" /></button

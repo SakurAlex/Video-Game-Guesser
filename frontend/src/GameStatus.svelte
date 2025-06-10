@@ -5,35 +5,33 @@
 
   export let remainingAttempts = 10;
   export let correctGame: GameGuess | null = null;
+  export let isGameOver = false;
 
   const dispatch = createEventDispatcher();
 
   function handleGiveUp() {
-    if (correctGame) {
-      const answerMessage = `
-You gave up! Here's the correct answer:
-
-Game: ${correctGame.gameName}
-Release Year: ${correctGame.releaseYear}
-Genres: ${correctGame.genres.join(", ")}
-Developers: ${correctGame.developers.join(", ")}
-Publishers: ${correctGame.publishers.join(", ")}
-Platforms: ${correctGame.platforms.join(", ")}
-    `;
-      alert(answerMessage);
-    } else {
-      alert("You gave up! But no game was loaded.");
+    if (confirm("Are you sure you want to give up? Click OK to see the answer.")) {
+      dispatch("giveUp");
     }
+  }
 
-    dispatch("giveUp");
+  function handlePlayAgain() {
+    dispatch("restart");
   }
 </script>
 
 <div class="status-container">
-  <h2 class="attempts-text">Remaining Attempts: {remainingAttempts}</h2>
-  <button on:click={handleGiveUp} class="give-up-button">
-    <img src={giveUpIcon} alt="Give Up" />
-    <span class="give-up-text">GIVE UP</span>
+    {#if !isGameOver}
+      <h2 class="attempts-text">Remaining Attempts: {remainingAttempts}</h2>
+    {/if}
+  <button on:click={isGameOver ? handlePlayAgain : handleGiveUp} class={isGameOver ? "play-again-button" : "give-up-button"}>
+    {#if !isGameOver}
+      <img src={giveUpIcon} alt="Give Up" />
+      <span class="button-text">GIVE UP</span>
+    {:else}
+      <img src={giveUpIcon} alt="Give Up" />
+      <span class="button-text">PLAY AGAIN</span>
+    {/if}
   </button>
 </div>
 
@@ -65,11 +63,34 @@ Platforms: ${correctGame.platforms.join(", ")}
     cursor: pointer;
   }
 
+  .play-again-button {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    background-color: #75ad79;
+    box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
+    border-radius: 20px;
+    border: none;
+    width: 160px;
+    height: 36px;
+    cursor: pointer;
+  }
+
   .give-up-button:hover {
     opacity: 0.9;
   }
 
-  .give-up-text {
+  .play-again-button:hover {
+    opacity: 0.9;
+  }
+
+  .button-text {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .play-again-text {
     font-size: 1.125rem;
     font-weight: 700;
     color: white;

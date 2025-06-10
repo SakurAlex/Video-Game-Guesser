@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import type { User } from './types';
 
   export let isVisible = false;
   
@@ -12,7 +13,10 @@
   let error = '';
   let success = '';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    close: void;
+    success: User;
+  }>();
   const API_BASE_URL = "http://localhost:8000/api";
 
   function switchMode() {
@@ -92,7 +96,7 @@
 
       if (response.ok) {
         success = data.message;
-        dispatch('loginSuccess', data.user);
+        dispatch('success', data.user);
         setTimeout(() => {
           close();
         }, 1000);
@@ -113,13 +117,13 @@
     dispatch('close');
   }
 
-  function handleOverlayClick(event) {
+  function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
     }
   }
 
-  function handleKeydown(event) {
+  function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       close();
     } else if (event.key === 'Enter') {

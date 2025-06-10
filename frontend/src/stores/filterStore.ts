@@ -87,7 +87,8 @@ export const filters = writable({
   yearEnd: MAX_YEAR,
   platforms: [...allPlatforms],  // default select all platforms
   genres: [...allGenres],        // default select all genres
-  topTier: null                  // e.g. one of [100, 500, 1000, 5000, 10000, null=unlimited]
+  topTier: null,                 // e.g. one of [100, 500, 1000, 5000, 10000, null=unlimited]
+  attempts: 10                   // default number of attempts
 });
 
 export { platformCategories, allPlatforms, allGenres }; 

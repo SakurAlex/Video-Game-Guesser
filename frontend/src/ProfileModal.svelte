@@ -1,14 +1,19 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import userCover from "./assets/default_user.svg";
+  import type { User, UserStats } from './types';
+
   export let isVisible = false;
-  export let user = null;
-  export let stats = null;
+  export let user: User | null = null;
+  export let stats: UserStats | null = null;
 
   let loading = false;
   let error = '';
 
-  const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher<{
+    close: void;
+    logout: void;
+  }>();
   const API_BASE_URL = "http://localhost:8000/api";
 
   async function logout() {
@@ -41,19 +46,19 @@
     dispatch('close');
   }
 
-  function handleOverlayClick(event) {
+  function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
     }
   }
 
-  function handleKeydown(event) {
+  function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       close();
     }
   }
 
-  function getWinRateColor(winRate) {
+  function getWinRateColor(winRate: number) {
     if (winRate >= 70) return '#4caf50'; // Green
     if (winRate >= 50) return '#ff9800'; // Orange
     return '#f44336'; // Red

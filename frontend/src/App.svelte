@@ -6,36 +6,46 @@
   import GameTable from "./GameTable.svelte";
   import LoginModal from "./LoginModal.svelte";
   import ProfileModal from "./ProfileModal.svelte";
+  import Result from "./Result.svelte";
   import { filters } from "./stores/filterStore.js";
-  import type { GameGuess } from "./types";
+  import type { GameGuess, User, UserStats, Filters } from "./types";
 
   // User state management
-  let user = null;
-  let userStats = null;
+  let user: User | null = null;
+  let userStats: UserStats | null = null;
   let showLoginModal = false;
   let showProfileModal = false;
+  let showResultModal = false;
+  let isWin = false;
+  let isGameOver = false;
   let authChecked = false;
 
   let remainingAttempts = 10;
   let guesses: GameGuess[] = [];
   let healthStatus = "checking...";
   let loading = true;
-  let error = null;
+  let error: string | null = null;
   let correctGame: GameGuess | null = null;
 
   const API_BASE_URL = "http://localhost:8000/api";
 
-  let currentFilters: {
-    yearStart: number | null;
-    yearEnd: number | null;
-    platforms: string[];
-    genres: string[];
-    topTier: number | null;
-  } = { yearStart: null, yearEnd: null, platforms: [], genres: [], topTier: null };
+  let currentFilters: Filters = {
+    yearStart: null,
+    yearEnd: null,
+    platforms: [],
+    genres: [],
+    topTier: null,
+    attempts: 10
+  };
 
   const unsubFilters = filters.subscribe((f) => {
     const filtersChanged = JSON.stringify(currentFilters) !== JSON.stringify(f);
     currentFilters = f;
+    
+    // Update remaining attempts when filter changes
+    if (f.attempts !== undefined) {
+      remainingAttempts = f.attempts;
+    }
     
     // if filters changed and not loading, fetch a new random game
     if (filtersChanged && !loading) {
@@ -175,17 +185,30 @@
   initialize();
 
   async function handleGiveUpEvent() {
+    if (!correctGame) return;
+    
+    isWin = false;
+    isGameOver = true;
+    showResultModal = true;
+
     // Recording failure results
     if (user) {
-      await recordGameResult(false, 10 - remainingAttempts);
+      await recordGameResult(false, currentFilters.attempts - remainingAttempts);
     }
-
-    remainingAttempts = 10;
-    guesses = [];
-    correctGame = null;
-    await fetchInitialRandomGame();
   }
 
+  async function handleResultClose() {
+    showResultModal = false;
+  }
+
+  async function handleRestart() {
+    showResultModal = false;
+    remainingAttempts = currentFilters.attempts;
+    guesses = [];
+    correctGame = null;
+    isGameOver = false;
+    await fetchInitialRandomGame();
+  }
 
   function compareYears(guess: GameGuess) {
     if (correctGame && correctGame.releaseYear && guess.releaseYear) {
@@ -319,31 +342,21 @@
   }
 
   async function LostEvent() {
-    const answerMessage = `
-You Lost! Here's the correct answer:
-
-Game: ${correctGame.gameName}
-Release Year: ${correctGame.releaseYear}
-Genres: ${correctGame.genres.join(", ")}
-Developers: ${correctGame.developers.join(", ")}
-Publishers: ${correctGame.publishers.join(", ")}
-Platforms: ${correctGame.platforms.join(", ")}
-    `;
-    alert(answerMessage);
+    if (!correctGame) return;
+    
+    // 显示结果界面
+    isWin = false;
+    isGameOver = true;
+    showResultModal = true;
 
     // Recording failure results
     if (user) {
-      await recordGameResult(false, 10 - remainingAttempts);
+      await recordGameResult(false, currentFilters.attempts - remainingAttempts);
     }
-
-    remainingAttempts = 10;
-    guesses = [];
-    correctGame = null;
-    await fetchInitialRandomGame();
   }
 
   // Successful login processing
-  function handleLoginSuccess(event) {
+  function handleLoginSuccess(event: { detail: User }) {
     user = event.detail;
     showLoginModal = false;
     refreshUserStats();
@@ -385,6 +398,7 @@ Platforms: ${correctGame.platforms.join(", ")}
     </div>
     <div class="content">
       <SearchBar
+        {isGameOver}
         on:gameGuessed={async (e) => {
           // Debug Information
           console.log("Game guessed:", e.detail);
@@ -402,30 +416,26 @@ Platforms: ${correctGame.platforms.join(", ")}
           if (correctGame) {
             const correctAnswer = `Correct Answer: ${correctGame.gameName}`;
             console.log(correctAnswer);
-          }
 
-          if (
-            e.detail.gameName.toLowerCase() ===
-            correctGame.gameName.toLowerCase()
-          ) {
-            alert("Congratulations! You guessed the game correctly!");
+            if (e.detail.gameName.toLowerCase() === correctGame.gameName.toLowerCase()) {
+              // 显示结果界面
+              isWin = true;
+              showResultModal = true;
 
-            //Record victory results
-            if (user) {
-              await recordGameResult(true, 10 - remainingAttempts);
+              //Record victory results
+              if (user) {
+                await recordGameResult(true, currentFilters.attempts - remainingAttempts);
+              }
             }
-
-            remainingAttempts = 10;
-            guesses = [];
-            correctGame = null;
-            await fetchInitialRandomGame();
           }
         }}
       />
       <GameStatus
         {remainingAttempts}
         {correctGame}
+        {isGameOver}
         on:giveUp={handleGiveUpEvent}
+        on:restart={handleRestart}
       />
       <GameTable {guesses} />
     </div>
@@ -454,21 +464,34 @@ Platforms: ${correctGame.platforms.join(", ")}
 {/if}
 
 <!--Modal box-->
-<LoginModal
-  bind:isVisible={showLoginModal}
-  on:loginSuccess={handleLoginSuccess}
-  on:close={() => (showLoginModal = false)}
-/>
+{#if showLoginModal}
+  <LoginModal
+    isVisible={showLoginModal}
+    on:close={() => (showLoginModal = false)}
+    on:success={handleLoginSuccess}
+  />
+{/if}
 
-<ProfileModal
-  bind:isVisible={showProfileModal}
-  {user}
-  stats={userStats}
-  on:logout={handleLogout}
-  on:close={() => (showProfileModal = false)}
-/>
+{#if showProfileModal}
+  <ProfileModal
+    isVisible={showProfileModal}
+    {user}
+    stats={userStats}
+    on:close={() => (showProfileModal = false)}
+    on:logout={handleLogout}
+  />
+{/if}
 
-
+{#if showResultModal}
+  <Result
+    isVisible={showResultModal}
+    {correctGame}
+    {isWin}
+    attempts={currentFilters.attempts - remainingAttempts}
+    on:close={handleResultClose}
+    on:restart={handleRestart}
+  />
+{/if}
 
 <style>
   main {

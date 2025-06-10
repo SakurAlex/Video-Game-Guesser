@@ -24,19 +24,21 @@
   const MIN_YEAR = 1981;
   const MAX_YEAR = new Date().getFullYear(); // Current year (2025)
 
-  // Local copy so we only commit on "Apply" - By default, all platforms and genres are selected
+  // Local copy so we only commit on "Apply"
   let local: {
     yearStart: number,
     yearEnd: number,
     platforms: string[],
     genres: string[],
-    topTier: number | null
+    topTier: number | null,
+    attempts: number
   } = {
     yearStart: MIN_YEAR,
     yearEnd: MAX_YEAR,
-    platforms: [...allPlatforms], // By default, all platforms are selected
-    genres: [...allGenres],       // By default, all genres are selected
-    topTier: null
+    platforms: [...allPlatforms],
+    genres: [...allGenres],
+    topTier: null,
+    attempts: 10
   };
 
   // UI state for messages
@@ -50,23 +52,24 @@
   // Seed `local` from the store when the modal opens
   onMount(() => {
     const unsubscribe = filters.subscribe((f: any) => {
-      // If the store has values, use the store's values, otherwise keep the default values
-      if (f.platforms.length > 0 || f.genres.length > 0 || f.yearStart || f.yearEnd || f.topTier) {
+      if (f.platforms.length > 0 || f.genres.length > 0 || f.yearStart || f.yearEnd || f.topTier || f.attempts) {
         local = {
           yearStart: f.yearStart,
           yearEnd: f.yearEnd,
-          platforms: [...f.platforms], // Deep copy array
-          genres: [...f.genres],       // Deep copy array  
-          topTier: f.topTier
+          platforms: [...f.platforms],
+          genres: [...f.genres],
+          topTier: f.topTier,
+          attempts: f.attempts
         };
       }
-      // Save the original state for comparison with deep copy
+      // Save the original state for comparison
       originalFilters = {
         yearStart: local.yearStart,
         yearEnd: local.yearEnd,
-        platforms: [...local.platforms], // Deep copy array
-        genres: [...local.genres],       // Deep copy array
-        topTier: local.topTier
+        platforms: [...local.platforms],
+        genres: [...local.genres],
+        topTier: local.topTier,
+        attempts: local.attempts
       };
       
       console.log('🎯 Settings opened - Original state saved:', originalFilters);
@@ -131,6 +134,16 @@
     }
   }
 
+  // Handle attempts input
+  function handleAttemptsChange(event: Event) {
+    const value = parseInt((event.target as HTMLInputElement).value);
+    if (value < 1) {
+      local.attempts = 1;
+    } else if (value > 999) {
+      local.attempts = 999;
+    }
+  }
+
   async function applyFilters() {
     isApplying = true;
     message = '';
@@ -187,7 +200,8 @@
         yearEnd: local.yearEnd,
         platforms: [...local.platforms], // Deep copy array
         genres: [...local.genres],       // Deep copy array
-        topTier: local.topTier
+        topTier: local.topTier,
+        attempts: local.attempts
       };
       
       message = 'Filter settings updated successfully! New random game will be selected based on new settings.';
@@ -212,7 +226,21 @@
       >
     </div>
     <div class="settings-body">
-          <!-- Year Range selector -->
+      <!-- Number of Attempts -->
+      <div class="filter-section">
+        <h3>Number of Attempts</h3>
+        <div class="attempts-container">
+          <input
+            type="number"
+            bind:value={local.attempts}
+            on:change={handleAttemptsChange}
+            min="1"
+            max="999"
+            class="attempts-input"
+          />
+        </div>
+      </div>
+      <!-- Year Range selector -->
       <div class="filter-section">
         <h3>Year Range</h3>
         <div class="year-range-container">
@@ -748,6 +776,43 @@
     transform: scale(0.95);
   }
 
+  .attempts-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .attempts-input {
+    width: 100px;
+    padding: 8px 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2c3e50;
+    transition: border-color 0.2s ease;
+  }
+
+  .attempts-input::-webkit-outer-spin-button,
+  .attempts-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .attempts-input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  .attempts-input:focus {
+    outline: none;
+    border-color: #b9dbf3;
+  }
+
+  .attempts-description {
+    font-size: 14px;
+    color: #666;
+  }
+
   @media (max-width: 768px) {
     .settings-content {
       width: 95%;
@@ -814,6 +879,15 @@
     }
 
     .toggle-btn {
+      width: 100%;
+    }
+
+    .attempts-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .attempts-input {
       width: 100%;
     }
   }

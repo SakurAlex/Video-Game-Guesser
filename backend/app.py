@@ -363,7 +363,7 @@ def process_cover_url(cover_data):
 
 def get_game_info(game_id):
     """Get detailed game information"""
-    query = f'''fields name, first_release_date, genres.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, platforms.name, cover.url;where id = {game_id};'''
+    query = f'''fields name, first_release_date, genres.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, platforms.name, cover.url, total_rating_count;where id = {game_id};'''
     
     games = igdb_request('games', query)
     if not games:
@@ -401,8 +401,10 @@ def get_game_info(game_id):
         'developers': developers,
         'publishers': publishers,
         'platforms': platforms,
-        'cover_url': cover_url
+        'cover_url': cover_url,
+        'total_rating_count': game.get('total_rating_count')
     }
+
 # Auth Endpoints
 @app.route('/api/auth/register', methods=['POST'])
 def register():
@@ -653,11 +655,27 @@ def get_random_game():
             ids = map_genre_names_to_ids(genres)
             where_clauses.append(f"genres = ({','.join(map(str,ids))})")
 
+
         # 3) Fetch filtered set (no hard limit here)
-        query  = "fields id, name;"
+        query  = "fields id, name, total_rating_count;"
+        
+        # Add total_rating_count threshold based on top_tier
+        if top_tier:
+            rating_threshold = {
+                100: 1000,    # Top 100: rating count > 1000
+                500: 5000,    # Top 500: rating count > 500
+                1000: 200,   # Top 1000: rating count > 200
+                5000: 100,    # Top 5000: rating count > 100
+                10000: 10    # Top 10000: rating count > 10
+            }.get(top_tier)
+            
+            if rating_threshold:
+                where_clauses.append(f"total_rating_count >= {rating_threshold}")
+        
         if where_clauses:
             query += " where " + " & ".join(where_clauses) + ";"
         
+        # Randomize the order of games that meet the criteria
         sort_options = [
             "total_rating_count desc",
             "name asc", 
@@ -666,7 +684,14 @@ def get_random_game():
         ]
         random_sort = random.choice(sort_options)
         query += f" sort {random_sort};"
-        random_offset = random.randint(0, 300)
+        
+        # Add offset for more randomness, but adjust based on top_tier
+        if top_tier:
+            max_offset = min(100, top_tier // 2)  # 限制偏移量，避免超出范围
+            random_offset = random.randint(0, max_offset)
+        else:
+            random_offset = random.randint(0, 300)
+        
         query += f" limit 100; offset {random_offset};"
 
         filtered = igdb_request('games', query) or []

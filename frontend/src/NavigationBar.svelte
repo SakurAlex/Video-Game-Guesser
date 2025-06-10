@@ -158,7 +158,7 @@
     background: #000000;
     color: #ffffff;
     border: none;
-    border-radius: 23px;
+    border-radius: 25px;
     padding: 4px 12px 4px 12px;
     cursor: pointer;
     transition: all 0.2s ease;

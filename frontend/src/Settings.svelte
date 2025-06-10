@@ -151,8 +151,8 @@
 
     try {
       // Validation: Check if any platforms or genres are selected
-      if (local.platforms.length === 0 && local.genres.length === 0) {
-        message = 'Please select at least one platform or game type';
+      if (local.platforms.length === 0 || local.genres.length === 0) {
+        message = 'Please select at least one platform or genre';
         messageType = 'error';
         return;
       }
@@ -583,7 +583,7 @@
     font-size: 14px;
     font-weight: 500;
     border-top: 1px solid #e5e5e5;
-    animation: slideIn 0.3s ease;
+    border-radius: 0 0 0 0;
   }
 
   .message-bar.success {

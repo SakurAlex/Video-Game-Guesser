@@ -157,6 +157,7 @@
       console.log(`Game ID: ${randomGameDetails.id}`);
       console.log(`Game Name: ${randomGameDetails.name}`);
       console.log(`Release Year: ${randomGameDetails.release_year || 'Unknown'}`);
+      console.log(`Total Rating Count: ${randomGameDetails.total_rating_count || 'N/A'}`);
       console.log(`Genres: ${randomGameDetails.genres?.length ? randomGameDetails.genres.join(', ') : 'None'}`);
       console.log(`Developers: ${randomGameDetails.developers?.length ? randomGameDetails.developers.join(', ') : 'None'}`);
       console.log(`Publishers: ${randomGameDetails.publishers?.length ? randomGameDetails.publishers.join(', ') : 'None'}`);

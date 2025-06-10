@@ -330,6 +330,9 @@ Platforms: ${correctGame.platforms.join(", ")}
   }
 </script>
 
+
+
+
 {#if loading}
   <div class="loading-screen">
     <div class="loading-spinner"></div>
@@ -391,6 +394,27 @@ Platforms: ${correctGame.platforms.join(", ")}
       <GameTable {guesses} />
     </div>
   </main>
+
+  <footer class="footer">
+    <p>
+      Inspired by
+      <a href="https://blast.tv/counter-strikle"
+         target="_blank" rel="noopener">
+        Blast.TV: Counter-Strikle
+      </a>
+    </p>
+    <p>
+      Data from
+      <a href="https://www.igdb.com/"
+         target="_blank" rel="noopener">
+        IGDB
+      </a>
+    </p>
+    <p>
+      Finished by 马祎江 (Alex Ma), 李润灵 (Runling Li),
+      芮毓辰 (Yuchen Rui), 鲁倬铭 (Zhuoming Lu), 夏晨洋(Chenyang Xia).
+    </p>
+  </footer>
 {/if}
 
 <!--Modal box-->
@@ -407,6 +431,8 @@ Platforms: ${correctGame.platforms.join(", ")}
   on:logout={handleLogout}
   on:close={() => (showProfileModal = false)}
 />
+
+
 
 <style>
   main {
@@ -449,6 +475,25 @@ Platforms: ${correctGame.platforms.join(", ")}
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
+
+  .footer {
+     text-align: center;
+     font-size: 0.9rem;
+     color: #666;
+     margin-top: 2rem;
+     padding: 1rem 0;
+     border-top: 1px solid #e0e0e0;
+   }
+   .footer p {
+     margin: 0.3rem 0;
+   }
+   .footer a {
+     color: #0070f3;
+     text-decoration: none;
+   }
+   .footer a:hover {
+     text-decoration: underline;
+   }
 
   @keyframes spin {
     0% {

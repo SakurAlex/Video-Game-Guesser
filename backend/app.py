@@ -663,7 +663,7 @@ def get_random_game():
         if top_tier:
             rating_threshold = {
                 100: 1000,    # Top 100: rating count > 1000
-                500: 5000,    # Top 500: rating count > 500
+                500: 500,    # Top 500: rating count > 500
                 1000: 200,   # Top 1000: rating count > 200
                 5000: 100,    # Top 5000: rating count > 100
                 10000: 10    # Top 10000: rating count > 10
@@ -687,7 +687,7 @@ def get_random_game():
         
         # Add offset for more randomness, but adjust based on top_tier
         if top_tier:
-            max_offset = min(100, top_tier // 2)  # 限制偏移量，避免超出范围
+            max_offset = min(100, top_tier // 2)  # Set the limit to it
             random_offset = random.randint(0, max_offset)
         else:
             random_offset = random.randint(0, 300)

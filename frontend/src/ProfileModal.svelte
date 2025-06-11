@@ -294,17 +294,11 @@
   }
 
   .stat-card {
-    background: white;
-    border: 2px solid #e1e5e9;
+    background: #f8f9fa;
     border-radius: 12px;
     padding: 20px;
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
   .stat-number {
@@ -388,7 +382,7 @@
     color: white;
     border: none;
     padding: 12px 24px;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;

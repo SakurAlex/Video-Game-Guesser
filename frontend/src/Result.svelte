@@ -252,7 +252,7 @@
   }
 
   .play-again-button {
-    background: #28a745;
+    background: #75ad79;
     color: white;
     border: none;
     padding: 12px 32px;

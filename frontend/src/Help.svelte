@@ -9,10 +9,18 @@
 
   const dispatch = createEventDispatcher();
 
+  /*
+   * close() is used to close the help modal.
+   * It dispatches the close event.
+  */
   function close() {
     dispatch('close');
   }
 
+  /*
+   * handleOverlayClick() is used to handle the overlay click.
+   * It closes the help modal when the user clicks on the overlay.
+  */
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
@@ -170,7 +178,61 @@
   }
 
   @media (max-width: 767px) {
-  
-  }
+    .tutorials-content {
+      width: 95%;
+      padding: 16px;
+      gap: 16px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
 
+    .main-title {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .cards-container {
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+      padding-bottom: 60px;
+    }
+
+    .tutorial-card {
+      height: auto;
+      min-height: 300px;
+      flex-shrink: 0;
+    }
+
+    .card-header h3 {
+      font-size: 18px;
+    }
+
+    .card-body {
+      padding: 16px;
+    }
+
+    .card-body p {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .got-it-button {
+      padding: 10px 24px;
+      font-size: 14px;
+    }
+
+    .button-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 0;
+      background: rgba(0, 0, 0, 0.5);
+      margin-top: 0;
+      display: flex;
+      justify-content: center;
+    }
+  }
 </style> 

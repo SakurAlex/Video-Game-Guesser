@@ -10,17 +10,29 @@
 
   const dispatch = createEventDispatcher();
 
+  /*
+   * close() is used to close the result modal.
+   * It sets the isVisible variable to false and dispatches the close event.
+  */
   function close() {
     isVisible = false;
     dispatch('close');
   }
 
+  /*
+   * handleOverlayClick() is used to handle the overlay click.
+   * It closes the result modal when the user clicks on the overlay.
+  */
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
     }
   }
 
+  /*
+   * handleKeydown() is used to handle the keydown event.
+   * It closes the result modal when the user presses the Escape key.
+  */
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       close();

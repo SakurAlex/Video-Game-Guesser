@@ -16,6 +16,11 @@
   }>();
   const API_BASE_URL = "http://localhost:8000/api";
 
+  /*
+   * logout() is used to logout the user.
+   * It sends a logout request to the backend.
+   * It also dispatches the logout event.
+  */
   async function logout() {
     loading = true;
     error = '';
@@ -40,30 +45,50 @@
     }
   }
 
+  /*
+   * close() is used to close the profile modal.
+   * It sets the isVisible variable to false and dispatches the close event.
+  */
   function close() {
     isVisible = false;
     error = '';
     dispatch('close');
   }
 
+  /*
+   * handleOverlayClick() is used to handle the overlay click.
+   * It closes the profile modal when the user clicks on the overlay.
+  */
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
     }
   }
 
+  /*
+   * handleKeydown() is used to handle the keydown event.
+   * It closes the profile modal when the user presses the Escape key.
+  */
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       close();
     }
   }
 
+  /*
+   * getWinRateColor() is used to get the color of the win rate.
+   * It returns the color of the win rate.
+  */
   function getWinRateColor(winRate: number) {
     if (winRate >= 70) return '#4caf50'; // Green
     if (winRate >= 50) return '#ff9800'; // Orange
     return '#f44336'; // Red
   }
 
+  /*
+   * getAverageAttempts() is used to get the average attempts.
+   * It returns the average attempts.
+  */
   function getAverageAttempts() {
     if (!stats || stats.total_games === 0) return 'N/A';
     return (stats.total_attempts / stats.total_games).toFixed(1);

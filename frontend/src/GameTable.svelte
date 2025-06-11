@@ -95,14 +95,16 @@
   .table-container {
     background: #ffffff;
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: -4px 4px 4px 0px rgba(0, 0, 0, 0.15);
     margin: 20px auto;
     max-width: 1300px;
+    width: 100%;
   }
   table {
     border-collapse: collapse;
     width: 100%;
+    min-width: 800px;
   }
   thead {
     background-color: #ddebf5;
@@ -170,19 +172,59 @@
   }
 
   /* responsive design */
-  @media (max-width: 767px) {
+  @media (max-width: 1024px) {
     .table-container {
-      margin: 10px;
-      border-radius: 8px;
-      overflow-x: auto;
+      margin: 15px auto;
+      border-radius: 10px;
     }
 
     table {
-      font-size: 14px;
+      min-width: 900px;
     }
 
     th {
-      padding: 8px 12px;
+      padding: 10px 20px;
+      font-size: 20px;
+    }
+
+    td {
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    .cover-image img {
+      width: 80px;
+      height: 64px;
+    }
+
+    .tag {
+      padding: 4px 8px;
+      font-size: 13px;
+      border-radius: 12px;
+    }
+
+    .tags-container {
+      gap: 3px;
+    }
+
+    .empty-message {
+      font-size: 20px;
+      padding: 25px 15px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .table-container {
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+
+    table {
+      min-width: 600px;
+    }
+
+    th {
+      padding: 3px 0px;
       font-size: 16px;
       white-space: nowrap;
     }
@@ -213,41 +255,4 @@
     }
   }
 
-  @media (max-width: 480px) {
-    .table-container {
-      margin: 5px;
-      box-shadow: -2px 2px 2px 0px rgba(0, 0, 0, 0.1);
-    }
-
-    th {
-      padding: 6px 8px;
-      font-size: 14px;
-    }
-
-    td {
-      padding: 6px;
-      font-size: 12px;
-    }
-
-    .empty-message {
-      font-size: 14px;
-      padding: 15px 8px;
-    }
-
-    .cover-image img {
-      width: 40px;
-      height: 32px;
-      border-radius: 6px;
-    }
-
-    .tag {
-      padding: 2px 4px;
-      font-size: 10px;
-      border-radius: 10px;
-    }
-
-    .tags-container {
-      gap: 1px;
-    }
-  }
 </style>

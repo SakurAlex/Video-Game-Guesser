@@ -32,7 +32,11 @@
     error = '';
     success = '';
   }
-
+  /*
+   * validateForm() is used to validate the form when the user submits the form.
+   * It checks if the username, email, and password are valid.
+   * It also checks if the password and confirm password are the same.
+  */
   function validateForm() {
     if (!username.trim()) {
       error = 'Username is required';
@@ -66,6 +70,12 @@
 
     return true;
   }
+  
+  /*
+   * handleSubmit() is used to handle the form submission.
+   * It validates the form and sends the data to the backend.
+   * It also shows the loading spinner and the success or error message.
+  */
 
   async function handleSubmit() {
     error = '';
@@ -110,18 +120,32 @@
       loading = false;
     }
   }
-
+ 
+  /*
+   * close() is used to close the modal.
+   * It clears the form and dispatches the close event.
+  */
   function close() {
     isVisible = false;
     clearForm();
     dispatch('close');
   }
 
+  /*
+   * handleOverlayClick() is used to handle the overlay click.
+   * It closes the modal when the user clicks on the overlay.
+  */
+ 
   function handleOverlayClick(event: MouseEvent) {
     if (event.target === event.currentTarget) {
       close();
     }
   }
+
+  /*
+   * handleKeydown() is used to handle the keydown event.
+   * It closes the modal when the user presses the Escape key or Enter key.
+  */
 
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape') {

@@ -196,7 +196,7 @@
   }
 
   /* responsive design */
-  @media (max-width: 767px) {
+  @media (max-width: 1024px) {
     .difficulty-section {
       display: none;
     }

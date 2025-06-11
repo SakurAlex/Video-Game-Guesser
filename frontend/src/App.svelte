@@ -56,7 +56,10 @@
   });
   onDestroy(unsubFilters);
 
-  // Check user login status
+  /*
+   * checkAuthStatus() is used to check if the user is logged in.
+   * It fetches the user's data from the backend.
+  */
   async function checkAuthStatus() {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -75,7 +78,10 @@
     }
   }
 
-  // new feature: refresh user stats
+  /*
+   * refreshUserStats() is used to refresh the user's stats.
+   * It fetches the user's data from the backend.
+  */
   async function refreshUserStats() {
     if (!user) return;
 
@@ -93,7 +99,10 @@
     }
   }
 
-  // Record game results
+  /*
+   * recordGameResult() is used to record the game result.
+   * It sends the game result to the backend.
+  */
   async function recordGameResult(won: boolean, attempts: number) {
     if (!user) return;
 
@@ -114,6 +123,10 @@
     }
   }
 
+  /*
+   * fetchInitialRandomGame() is used to fetch the initial random game.
+   * It fetches the random game from the backend.
+  */
   async function fetchInitialRandomGame() {
     try {
       console.log("fetchInitialRandomGame called!");
@@ -151,9 +164,6 @@
       };
 
       // Debug information: print all game information
-      console.log("=" .repeat(60));
-      console.log("🎮 NEW RANDOM GAME SELECTED (Settings Changed)");
-      console.log("=" .repeat(60));
       console.log(`Game ID: ${randomGameDetails.id}`);
       console.log(`Game Name: ${randomGameDetails.name}`);
       console.log(`Release Year: ${randomGameDetails.release_year || 'Unknown'}`);
@@ -163,20 +173,21 @@
       console.log(`Publishers: ${randomGameDetails.publishers?.length ? randomGameDetails.publishers.join(', ') : 'None'}`);
       console.log(`Platforms: ${randomGameDetails.platforms?.length ? randomGameDetails.platforms.join(', ') : 'None'}`);
       console.log(`Cover URL: ${randomGameDetails.cover_url || 'None'}`);
-      console.log("-" .repeat(60));
       console.log(`Applied Filters:`);
       console.log(`  - Year Range: ${currentFilters.yearStart || 'None'} to ${currentFilters.yearEnd || 'None'}`);
       console.log(`  - Platforms: ${currentFilters.platforms.length > 0 ? `${currentFilters.platforms.length} selected` : 'All'}`);
       console.log(`  - Genres: ${currentFilters.genres.length > 0 ? `${currentFilters.genres.length} selected` : 'All'}`);
       console.log(`  - Top Tier: ${currentFilters.topTier || 'Unlimited'}`);
-      console.log("=" .repeat(60));
     } catch (err: any) {
       error = `Failed to load random game: ${err.message}`;
       console.error("Error fetching random game:", err);
     }
   }
 
-  // Initialization
+  /*
+   * initialize() is used to initialize the app.
+   * It checks the user's login status and fetches the initial random game.
+  */
   async function initialize() {
     await checkAuthStatus();
     await fetchInitialRandomGame();
@@ -185,6 +196,10 @@
 
   initialize();
 
+  /*
+   * handleGiveUpEvent() is used to handle the give up event.
+   * It records the game result and shows the result modal.
+  */
   async function handleGiveUpEvent() {
     if (!correctGame) return;
     
@@ -198,9 +213,18 @@
     }
   }
 
+  /*
+   * handleResultClose() is used to handle the result close event.
+   * It closes the result modal.
+  */
   async function handleResultClose() {
     showResultModal = false;
   }
+
+  /*
+   * handleRestart() is used to handle the restart event.
+   * It restarts the game.
+  */
 
   async function handleRestart() {
     showResultModal = false;
@@ -211,6 +235,10 @@
     await fetchInitialRandomGame();
   }
 
+  /*
+   * compareYears() is used to compare the years of the guess and the correct game.
+   * It sets the arrow of the guess.
+  */
   function compareYears(guess: GameGuess) {
     if (correctGame && correctGame.releaseYear && guess.releaseYear) {
       // Ensure that the year data exists and is valid
@@ -256,6 +284,10 @@
     }
   }
 
+  /*
+   * compareArrays() is used to compare the arrays of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function compareArrays(
     guessArray: string[],
     correctArray: string[],
@@ -269,6 +301,10 @@
     });
   }
 
+  /*
+   * compareGenres() is used to compare the genres of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function compareGenres(guess: GameGuess) {
     if (correctGame && correctGame.genres && guess.genres) {
       guess.genreStatuses = compareArrays(guess.genres, correctGame.genres);
@@ -283,6 +319,10 @@
     }
   }
 
+  /*
+   * compareDevelopers() is used to compare the developers of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function compareDevelopers(guess: GameGuess) {
     if (correctGame && correctGame.developers && guess.developers) {
       guess.developerStatuses = compareArrays(
@@ -300,6 +340,10 @@
     }
   }
 
+  /*
+   * comparePublishers() is used to compare the publishers of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function comparePublishers(guess: GameGuess) {
     if (correctGame && correctGame.publishers && guess.publishers) {
       guess.publisherStatuses = compareArrays(
@@ -317,6 +361,10 @@
     }
   }
 
+  /*
+   * comparePlatforms() is used to compare the platforms of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function comparePlatforms(guess: GameGuess) {
     if (correctGame && correctGame.platforms && guess.platforms) {
       guess.platformStatuses = compareArrays(
@@ -334,6 +382,10 @@
     }
   }
 
+  /*
+   * compareAllProperties() is used to compare all the properties of the guess and the correct game.
+   * It sets the status of the guess.
+  */
   function compareAllProperties(guess: GameGuess) {
     compareYears(guess);
     compareGenres(guess);
@@ -342,10 +394,14 @@
     comparePlatforms(guess);
   }
 
+  /*
+   * LostEvent() is used to handle the lost event.
+   * It records the game result and shows the result modal.
+  */
   async function LostEvent() {
     if (!correctGame) return;
     
-    // 显示结果界面
+    // display the result modal
     isWin = false;
     isGameOver = true;
     showResultModal = true;
@@ -356,21 +412,30 @@
     }
   }
 
-  // Successful login processing
+  /*
+   * handleLoginSuccess() is used to handle the login success event.
+   * It sets the user and refreshes the user stats.
+  */
   function handleLoginSuccess(event: { detail: User }) {
     user = event.detail;
     showLoginModal = false;
     refreshUserStats();
   }
 
-  // Logout processing
+  /*
+   * handleLogout() is used to handle the logout event.
+   * It sets the user and user stats to null.
+  */
   function handleLogout() {
     user = null;
     userStats = null;
     showProfileModal = false;
   }
 
-  // Show profile
+  /*
+   * showProfile() is used to show the profile modal.
+   * It shows the profile modal if the user is logged in.
+  */
   function showProfile() {
     if (user) {
       showProfileModal = true;
@@ -419,7 +484,7 @@
             console.log(correctAnswer);
 
             if (e.detail.gameName.toLowerCase() === correctGame.gameName.toLowerCase()) {
-              // 显示结果界面
+              // display the result modal
               isWin = true;
               showResultModal = true;
 

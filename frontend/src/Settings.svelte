@@ -51,6 +51,7 @@
 
   // Seed `local` from the store when the modal opens
   onMount(() => {
+
     const unsubscribe = filters.subscribe((f: any) => {
       if (f.platforms.length > 0 || f.genres.length > 0 || f.yearStart || f.yearEnd || f.topTier || f.attempts) {
         local = {
@@ -77,12 +78,20 @@
     unsubscribe();
   });
 
+  /*
+   * toggleArray() is used to toggle the array.
+   * It toggles the array.
+  */
   function toggleArray(arr: string[], val: string) {
     const i = arr.indexOf(val);
     if (i >= 0) arr.splice(i, 1);
     else arr.push(val);
   }
 
+  /*
+   * togglePlatformCategory() is used to toggle the platform category.
+   * It toggles the platform category.
+  */
   function togglePlatformCategory(category: string) {
     const categoryPlatforms = platformCategories[category].platforms;
     const allSelected = categoryPlatforms.every(p => local.platforms.includes(p));
@@ -97,18 +106,29 @@
     }
   }
 
+  /*
+   * isPlatformCategorySelected() is used to check if the platform category is selected.
+   * It checks if the platform category is selected.
+  */
   function isPlatformCategorySelected(category: string): boolean {
     const categoryPlatforms = platformCategories[category].platforms;
     return categoryPlatforms.every(p => local.platforms.includes(p));
   }
 
+  /*
+   * isPlatformCategoryPartiallySelected() is used to check if the platform category is partially selected.
+   * It checks if the platform category is partially selected.
+  */
   function isPlatformCategoryPartiallySelected(category: string): boolean {
     const categoryPlatforms = platformCategories[category].platforms;
     const selectedCount = categoryPlatforms.filter(p => local.platforms.includes(p)).length;
     return selectedCount > 0 && selectedCount < categoryPlatforms.length;
   }
 
-  // Genre selection functions
+  /*
+   * toggleAllGenres() is used to toggle all genres.
+   * It toggles all genres.
+  */
   function toggleAllGenres() {
     if (local.genres.length === allGenres.length) {
       local.genres = [];
@@ -117,7 +137,10 @@
     }
   }
 
-  // Handle year input blur events
+  /*
+   * handleYearStartBlur() is used to handle the year start blur event.
+   * It handles the year start blur event.
+  */
   function handleYearStartBlur() {
     if (!local.yearStart || local.yearStart < MIN_YEAR) {
       local.yearStart = MIN_YEAR;
@@ -126,6 +149,10 @@
     }
   }
 
+  /*
+   * handleYearEndBlur() is used to handle the year end blur event.
+   * It handles the year end blur event.
+  */
   function handleYearEndBlur() {
     if (!local.yearEnd || local.yearEnd > MAX_YEAR) {
       local.yearEnd = MAX_YEAR;
@@ -134,7 +161,10 @@
     }
   }
 
-  // Handle attempts input
+  /*
+   * handleAttemptsChange() is used to handle the attempts change event.
+   * It handles the attempts change event.
+  */
   function handleAttemptsChange(event: Event) {
     const value = parseInt((event.target as HTMLInputElement).value);
     if (value < 1) {
@@ -144,6 +174,10 @@
     }
   }
 
+  /*
+   * applyFilters() is used to apply the filters.
+   * It applies the filters.
+  */
   async function applyFilters() {
     isApplying = true;
     message = '';
@@ -198,8 +232,8 @@
       originalFilters = {
         yearStart: local.yearStart,
         yearEnd: local.yearEnd,
-        platforms: [...local.platforms], // Deep copy array
-        genres: [...local.genres],       // Deep copy array
+        platforms: [...local.platforms], 
+        genres: [...local.genres],      
         topTier: local.topTier,
         attempts: local.attempts
       };

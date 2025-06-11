@@ -1,0 +1,64 @@
+AI Tools Used
+- Claude 3.5 Sonnet
+- ChatGPT
+
+Ways of Using
+- Pair programming with AI for both development and debugging
+- Using AI for code review and optimization
+- Getting guidance on best practices and design patterns
+
+Questions Asked & Solutions
+
+Frontend Development
+- How to create a repository using Svelte as Frontend, using Flask as backend and can be built using docker?
+  - AI provided project structure with basic code.
+  - Helped set up Dockerfile and docker-compose.yml
+
+- How to create a table using html and css for game guesses?
+  - AI provides the tags such as tr th related to table.
+
+- How to make animation to continuously zoom in and zoom out a component?
+  - Tutorials for transition effect (css)
+
+- How to add a checkbox that can check all the checkbox below?
+  - Tutorials master checkbox functionality
+  - Two-way binding with child checkboxes
+
+- How to add filter to limit the video game randomly chosen?
+  - Helped implement top-tier filtering based on rating counts
+
+- If the user input is below 1980, how can I make sure the value present immediately recover to 1980?
+  - Tutorials for adding value clamping on blur event
+
+
+- How to make Help component cards stack vertically on mobile?
+  - just flex-direction: column
+  - Added proper scrolling behavior and fixed header/footer
+
+- How to fix frontend test failures?
+  - AI identified the issue in Help.spec.ts (wrong button text)
+  - Modified test to use correct "I got it!" button text
+
+### Backend Development
+- How to run and understand backend tests?
+  - AI explained test structure in test_app.py
+  - Guided through 42 test cases covering authentication, game search, and user stats
+
+### Code Organization
+- How to manage branches and merges?
+  - AI helped identify duplicate branches
+  - Guided through branch cleanup and merging process
+  - Helped resolve merge conflicts
+
+## Evaluation
+   - AI Provides clean and clear code tutorials
+   - Systematic approach to debugging
+   - Step-by-step guidance through complex issues
+   - Help with test setup and configuration
+   - Quick identification and fixing of test failures
+
+Overall Impact
+- Significantly improved development efficiency
+- Helped maintain code quality and test coverage
+- Effective for both feature development and debugging
+- Particularly helpful for responsive design implementation

@@ -4,9 +4,10 @@ import { filters } from '../stores/filterStore';
 import { vi } from 'vitest';
 
 describe('Settings.svelte', () => {
+  const currentYear = new Date().getFullYear();
   const defaultFilters = {
     yearStart: 1981,
-    yearEnd: new Date().getFullYear(),
+    yearEnd: currentYear,
     platforms: [
       'PC','Mac','Linux','iOS','Android',
       'PlayStation 1','PlayStation 2','PlayStation 3','PlayStation 4','PlayStation 5',
@@ -74,10 +75,11 @@ describe('Settings.svelte', () => {
     const yearInputs = container.querySelectorAll('.year-input') as NodeListOf<HTMLInputElement>;
     const endInput = yearInputs[1];
 
-    await fireEvent.input(endInput, { target: { value: '3000' } });
+    const futureYear = currentYear + 10;
+    await fireEvent.input(endInput, { target: { value: String(futureYear) } });
     await fireEvent.blur(endInput);
 
-    expect(endInput.value).toBe(`${new Date().getFullYear()}`);
+    expect(endInput.value).toBe(String(currentYear));
   });
 
   test('year-end blur clamps below start year to start year', async () => {

@@ -24,10 +24,11 @@ describe('Help.svelte', () => {
     expect(getByText('You have 10 chances (default) to guess the correct game.')).toBeInTheDocument();
   });
 
-  it('emits close when the × button is clicked', async () => {
+  it('emits close when the "I got it!" button is clicked', async () => {
     const { getByText, component } = render(Help, { props: { show: true } });
     const closePromise = new Promise(resolve => component.$on('close', resolve));
-    await fireEvent.click(getByText('×'));
+    const closeButton = getByText('I got it!');
+    await fireEvent.click(closeButton);
     await expect(closePromise).resolves.toBeDefined();
   });
 

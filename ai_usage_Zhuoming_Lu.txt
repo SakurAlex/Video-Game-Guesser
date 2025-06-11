@@ -1,0 +1,14 @@
+In this project, I used ChatGPT to assist in the following key areas:
+Code review and logic analysis: I asked ChatGPT to analyze the code written by my teammates to understand its structure and ensure that my ideas were feasible. ChatGPT also helped me identify potential problems and improve the logic.
+
+Backend development: I used ChatGPT to write the backend code, which included randomly selecting data from the database. ChatGPT provided sample code and instructions, which I then referred to and integrated into the project. (Later modified by teammates)
+
+Front-end data transfer: I was unsure how to pass data between different files on the front-end. ChatGPT explained how to build data flows and provided implementation guidance, which I adjusted for my own use case.
+
+Comparison logic: I borrowed some code from ChatGPT to compare two Json data sets,
+
+Debugging: Whenever I encountered an error, I consulted ChatGPT to understand the cause and find a solution. This accelerated my troubleshooting process.
+
+Test development: I also used ChatGPT to help me write backend test code. Afterwards, I reviewed and modified the code myself, with a coverage rate of 94%.
+
+Working with AI has improved the quality and efficiency of my development process, while I am still responsible for the integration and optimization of the code.
